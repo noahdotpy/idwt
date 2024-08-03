@@ -5,7 +5,7 @@ COPY src /
 RUN apk add nushell; \
     apk add sudo
 
-FROM fedora AS dev
+FROM fedora AS fedora-dev
 COPY src /out
 RUN rm -r /out/etc/
 COPY src /
