@@ -17,6 +17,7 @@ def "main apply block-flatpak-networking" [] {
     for user in $users_affected {
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
         let flatpaks_list = $config | get block-flatpak-networking.apps
+        mkdir $overrides_dir
         for file in (ls $"($overrides_dir)") {
             let file_name = echo $file | get name | path basename
             let override_file = $"($overrides_dir)/($file_name)"
@@ -56,7 +57,13 @@ def "main apply block-hosts" [--force] {
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
 
-    rm $hosts_file
+    if not ($hosts_file | path dirname | path exists) {
+        mkdir ($hosts_file | path dirname)
+    }
+
+    if ($hosts_file | path exists) {
+        rm $hosts_file
+    }
     echo "## THIS FILE MAY BE REPLACED AT ANY TIME AUTOMATICALLY ##" | save --force $hosts_file
     echo $"INFO: Saving hosts file at '($hosts_file)'"
 

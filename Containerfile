@@ -1,4 +1,9 @@
-FROM alpine
-COPY src /
+FROM fedora AS dev
 COPY src /out
-RUN apk add nushell
+RUN rm -r /out/etc/
+COPY src /
+RUN dnf install nu e2fsprogs iptables -y
+RUN useradd john
+
+FROM scratch AS prod
+COPY --from=dev /out /out
