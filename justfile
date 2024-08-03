@@ -1,7 +1,10 @@
-build-run-dev:
-    podman build -t idwt-dev --target dev .; podman run -it localhost/idwt-dev /usr/bin/nu -n
-build-dev:
-    podman build -t idwt-dev --target dev .
+build-enter TARGET="alpine-dev":
+    #!/bin/sh
+    just build {{TARGET}}
+    just enter {{TARGET}}
 
-build-prod:
-    podman build -t idwt-prod --target prod .
+build TARGET="alpine-dev":
+    podman build -t idwt-{{ TARGET }} --target {{ TARGET }} .
+
+enter TARGET="alpine-dev":
+    podman run -it localhost/idwt-{{ TARGET }} /usr/bin/nu -n
