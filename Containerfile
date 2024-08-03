@@ -1,16 +1,21 @@
 FROM alpine AS alpine-dev
-COPY src /out
-RUN rm -r /out/etc/
-COPY src /
 RUN apk add nushell; \
-    apk add sudo
+    apk add sudo; \
+    apk add shadow;
+
+COPY src /
+ENTRYPOINT [ "/usr/bin/nu", "--config", "/etc/nushell/config.nu", "--env-config", "/etc/nushell/env.nu", "-e", "/usr/bin/idwt -h"]
 
 FROM fedora AS fedora-dev
-COPY src /out
-RUN rm -r /out/etc/
-COPY src /
 RUN dnf install nu e2fsprogs iptables -y
 RUN useradd john
 
+COPY src /
+ENTRYPOINT [ "/usr/bin/nu", "--config", "/etc/nushell/config.nu", "--env-config", "/etc/nushell/env.nu", "-e", "/usr/bin/idwt -h"]
+
+FROM alpine AS clean-out
+COPY src /out
+RUN rm -r /out/etc
+
 FROM scratch AS prod
-COPY --from=alpine-dev /out /out
+COPY --from=clean-out /out /

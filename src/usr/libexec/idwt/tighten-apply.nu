@@ -19,6 +19,6 @@ if not (regex_matches_with_any $approved_commands $command) {
 
 let command_as_list = $command | split row ' '
 
-sudo $idwt_bin edit ...$command_as_list
+^$idwt_bin edit ...$command_as_list
 
 rm $tighten_temp_file

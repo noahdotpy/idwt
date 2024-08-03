@@ -19,3 +19,4 @@ tightener-config:
   - ^config update user-networking\.users\.[^.]+\.mode block$
   - ^config append block-flatpak-networking\.apps [^\s]*$ # config append block-flaptak-networking.apps *
   - ^config append block-hosts [^\s]*$ # config append block-hosts *
+  - ^group remove noah wheel$

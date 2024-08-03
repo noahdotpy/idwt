@@ -22,32 +22,38 @@ def "main edit group remove" [
 }
 
 def "main edit config update" [
-    field: cell-path,
-    value: any
+    path: cell-path,
+    value: any,
+    --show-new # Show the newly changed config file
 ] {
     let config = open $config_file
 
-    let new_config = $config | upsert $field $value
+    let new_config = $config | upsert $path $value
 
     $new_config | to yaml | save -f $config_file
-    echo $new_config | to yaml
+    if $show_new {
+        echo $new_config | to yaml
+    }
 }
 
 def "main edit config append" [
-    field: cell-path
+    path: cell-path,
     value: any,
+    --show-new # Show the newly changed config file
 ] {
     let config = open $config_file
 
-    let new_value = $config | get -i $field | append $value
-    let new_config = $config | upsert $field $new_value
+    let new_value = $config | get -i $path | append $value
+    let new_config = $config | upsert $path $new_value
 
     $new_config | to yaml | save -f $config_file
-    echo $new_config | to yaml
+    if $show_new {
+        echo $new_config | to yaml
+    }
 }
 
 def "main edit config" [
-    --editor(-e): string, # editor to open config file in when `--open` is used
+    --editor(-e): string, # Editor to open config file in when `--open` is used
 ] {
     let editor = if $editor == null {
         "vim"

@@ -8,5 +8,5 @@ source ../lib/idwt/cmd/tighten.nu
 
 # TODO: investigate schema validation for config.yml
 
-# For when I Don't Want To
+# I Don't Want To
 def main [] {}
