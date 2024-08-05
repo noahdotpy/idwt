@@ -52,7 +52,7 @@ def "main apply block-flatpak-networking" [] {
     }
 }
 
-def "main apply block-hosts" [--force] {
+def "main apply block-hosts" [] {
     echo "## Applying: block-hosts ##"
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
@@ -69,9 +69,7 @@ def "main apply block-hosts" [--force] {
 
     let config = open $config_file
 
-    # TODO: This does not properly detect that the property is populated, thus always skipping
-    # TODO: Remove --force flag when this is fixed.
-    if not (is_property_populated $config block-hosts) and not $force {
+    if not (is_property_populated $config block-hosts) {
         echo "INFO: No hosts listed, skipping"
         return
     }
