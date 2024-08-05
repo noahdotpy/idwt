@@ -18,14 +18,14 @@ export def regex_matches_with_any [
 
 export def "is_property_defined" [
     record: record,
-    property: cell-path,
+    property: string
 ] {
     return (not ($record | columns | where $it == $property | is-empty))
 }
 
 export def "is_property_populated" [
     record: record
-    property: cell-path,
+    property: string,
 ] {
     if not (is_property_defined $record $property) {
         return false
