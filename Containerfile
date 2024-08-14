@@ -19,3 +19,4 @@ RUN rm -r /out/etc
 
 FROM scratch AS prod
 COPY --from=clean-out /out /
+COPY --from=clean-out /out /out/
