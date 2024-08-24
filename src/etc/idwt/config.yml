@@ -1,3 +1,6 @@
+chromium:
+  block-urls:
+  - youtube.com
 block-hosts:
 - example.com
 block-flatpak-networking:
@@ -17,6 +20,7 @@ user-networking:
 tightener-config:
   approved-commands:
   - ^config update user-networking\.users\.[^.]+\.mode block$
-  - ^config append block-flatpak-networking\.apps [^\s]*$ # config append block-flaptak-networking.apps *
-  - ^config append block-hosts [^\s]*$ # config append block-hosts *
+  - ^config append block-flatpak-networking\.apps [^\s]*$
+  - ^config append block-hosts [^\s]*$
+  - ^config append chromium.block-urls [^\s]*$
   - ^group remove noah wheel$

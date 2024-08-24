@@ -15,9 +15,9 @@ use ../constants.nu *
 #   idwt tighten config update user-networking.users.noah.mode block
 #   idwt tighten group remove noah wheel
 
-# Edit approved configuration without admin for a group of users.
+# Edit approved configuration without admin.
 def "main tighten" [
-    ...command: string # The subcommand to pass to edit (example: `config append block-hosts youtube.com` uses this under the hood `idwt edit config append block-hosts youtube.com`)
+    ...command: string # The subcommand to pass to `idwt edit` (example: `config append block-hosts youtube.com` uses this under the hood `idwt edit config append block-hosts youtube.com`)
 ] {
     {command: ($command | str join ' ')} | to nuon | save -f $tighten_temp_file
     ^sudo /usr/libexec/idwt/tighten-apply.nu

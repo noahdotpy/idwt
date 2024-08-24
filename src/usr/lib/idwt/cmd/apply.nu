@@ -8,6 +8,16 @@ use ../lib.nu *
 
 # TODO: Add documentation for commands
 
+def "main apply chromium-blocked-urls" [] {
+    let config = open $config_file
+    
+    let policy = {URLBlocklist: ($config | get chromium.block-urls)}
+    let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
+
+    mkdir ($policy_file | path dirname)
+    $policy | to json | save -f $policy_file
+}
+
 def "main apply block-flatpak-networking" [] {
     echo "## Applying: block-flatpak-networking ##"
 
@@ -126,5 +136,6 @@ def "main apply user-networking" [] {
 def "main apply" [] {
     main apply block-hosts
     main apply block-flatpak-networking
+    main apply chromium-blocked-urls
     main apply user-networking
 }
