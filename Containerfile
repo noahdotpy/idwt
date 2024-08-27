@@ -1,6 +1,7 @@
 FROM alpine AS alpine-dev
 RUN apk add nushell; \
     apk add sudo; \
+    apk add yq; \
     apk add shadow;
 
 COPY src /

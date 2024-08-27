@@ -19,8 +19,8 @@ user-networking:
       time_end: 15:00
 tightener-config:
   approved-commands:
-  - ^config update user-networking\.users\.[^.]+\.mode block$
-  - ^config append block-flatpak-networking\.apps [^\s]*$
-  - ^config append block-hosts [^\s]*$
-  - ^config append chromium.block-urls [^\s]*$
+  - ^config "\.block-hosts \+= "[a-zA-Z0-9.]*""$ # config ".block-hosts += "youtube.com""
+  - ^config "\.block-flatpak-networking\.apps \+= "[a-zA-Z0-9.]*""$ # config ".block-flatpak-networking.apps += "com.google.Chrome""
+  - ^config "\.chromium.block-urls \+= "[a-zA-Z0-9.]*""$ # config ".chromium.block-urls += "*""
+  - ^config \"\.user-networking\.users\.john\.mode = "block"\"$ # config ".user-networking.users.john.mode = "block""
   - ^group remove noah wheel$

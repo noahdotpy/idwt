@@ -21,45 +21,9 @@ def "main edit group remove" [
     group_remove $user $group
 }
 
-def "main edit config update" [
-    path: cell-path,
-    value: any,
-    --show-new # Show the newly changed config file
-] {
-    let config = open $config_file
-
-    let new_config = $config | upsert $path $value
-
-    $new_config | to yaml | save -f $config_file
-    if $show_new {
-        echo $new_config | to yaml
-    }
-}
-
-def "main edit config append" [
-    path: cell-path,
-    value: any,
-    --show-new # Show the newly changed config file
-] {
-    let config = open $config_file
-
-    let new_value = $config | get -i $path | append $value
-    let new_config = $config | upsert $path $new_value
-
-    $new_config | to yaml | save -f $config_file
-    if $show_new {
-        echo $new_config | to yaml
-    }
-}
-
 def "main edit config" [
-    --editor(-e): string, # Editor to open config file in when `--open` is used
+    yq_eval_string: string # example: `.user-networking.users.john.mode = "block"'`
 ] {
-    let editor = if $editor == null {
-        "vim"
-    } else {
-        $editor
-    }
-
-    ^$editor $config_file
+    let new_contents = yq eval $yq_eval_string $config_file
+    echo $new_contents | save -f $config_file
 }
