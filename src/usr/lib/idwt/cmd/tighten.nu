@@ -5,6 +5,7 @@
 use ../constants.nu *
 
 
+# TODO: Update this documentation to match yq
 # Tighten executes `idwt edit {command}` under the hood.
 # `/usr/libexec/idwt/tighten-apply.nu` should be allowed for any user in idwt-tightener group.
 #   - This can be done with a sudoers file (example file location: /etc/sudoers.d/allow-idwtn).
