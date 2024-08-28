@@ -22,7 +22,7 @@ def "main edit group remove" [
 }
 
 def "main edit config" [
-    yq_eval_string: string # example: `.user-networking.users.john.mode = "block"'`
+    yq_eval_string: string # example: `.user-networking.users.john.mode = "block"`
 ] {
     let new_contents = yq eval $yq_eval_string $config_file
     echo $new_contents | save -f $config_file
