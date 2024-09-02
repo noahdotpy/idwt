@@ -20,7 +20,7 @@ user-networking:
 tightener-config:
   approved-commands:
   - ^config \.block-hosts \+= "[a-zA-Z0-9.]*"$ # config '.block-hosts += "youtube.com"'
-  - ^config \.block-flatpak-networking\.apps \+= "[a-zA-Z0-9.]*"$ # config '.block-flatpak-networking.apps += "com.google.Chrome"'
-  - ^config \.chromium.block-urls \+= "[a-zA-Z0-9.]*"$ # config '.chromium.block-urls += "youtube.com"'
-  - ^config \.user-networking\.users\.john\.mode = "block"$ # config ".user-networking.users.john.mode = "block""
+  - ^config \.block-flatpak-networking\.apps \+= "[^"']*\.[^"']*\.[^"']*"$ # config '.block-flatpak-networking.apps += "com.google.Chrome"'
+  - ^config \.chromium.block-urls \+= "[^"']*"$ # config '.chromium.block-urls += "youtube.com"'
+  - ^config \.user-networking\.users\.noah\.mode = "block"$ # config ".user-networking.users.noah.mode = "block""
   - ^group remove noah wheel$
