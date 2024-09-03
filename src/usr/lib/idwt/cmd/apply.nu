@@ -5,12 +5,11 @@
 use ../constants.nu *
 use ../group.nu *
 use ../lib.nu *
+use ../config.nu *
 
 # TODO: Add documentation for commands
 
-def "main apply chromium-blocked-urls" [] {
-    let config = open $config_file
-    
+def "main apply chromium-blocked-urls" [config: record] {
     let policy = {URLBlocklist: ($config | get chromium.block-urls)}
     let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
 
@@ -18,10 +17,8 @@ def "main apply chromium-blocked-urls" [] {
     $policy | to json | save -f $policy_file
 }
 
-def "main apply block-flatpak-networking" [] {
+def "main apply block-flatpak-networking" [config: record] {
     echo "## Applying: block-flatpak-networking ##"
-
-    let config = open $config_file
 
     let users_affected = $config | get block-flatpak-networking.users-affected
     for user in $users_affected {
@@ -62,7 +59,7 @@ def "main apply block-flatpak-networking" [] {
     }
 }
 
-def "main apply block-hosts" [] {
+def "main apply block-hosts" [config: record] {
     echo "## Applying: block-hosts ##"
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
@@ -77,8 +74,6 @@ def "main apply block-hosts" [] {
     echo "## THIS FILE MAY BE REPLACED AT ANY TIME AUTOMATICALLY ##" | save --force $hosts_file
     echo $"INFO: Saving hosts file at '($hosts_file)'"
 
-    let config = open $config_file
-
     if not (is_property_populated $config block-hosts) {
         echo "INFO: No hosts listed, skipping"
         return
@@ -91,11 +86,11 @@ def "main apply block-hosts" [] {
     }
 }
 
-def "main apply user-networking" [] {
+def "main apply user-networking" [config: record] {
     echo "## Applying: user-networking ##"
 
-    let nowifi_users = open $config_file | get user-networking.users
-    let schedules = open $config_file | get user-networking.schedules
+    let nowifi_users = $config | get user-networking.users
+    let schedules = $config | get user-networking.schedules
 
     for username in ($nowifi_users | columns) {
         let user = $nowifi_users | get $username
@@ -134,8 +129,15 @@ def "main apply user-networking" [] {
 }
 
 def "main apply" [] {
-    main apply block-hosts
-    main apply block-flatpak-networking
-    main apply chromium-blocked-urls
-    main apply user-networking
+    let config = get_parsed_config
+
+    main apply block-hosts $config
+    main apply block-flatpak-networking $config
+    main apply chromium-blocked-urls $config
+    main apply user-networking $config
+}
+
+def "main parsed_config" [] {
+  let config = get_parsed_config
+  echo $config | to yaml
 }
