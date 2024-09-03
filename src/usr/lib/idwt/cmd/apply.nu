@@ -136,8 +136,3 @@ def "main apply" [] {
     main apply chromium-blocked-urls $config
     main apply user-networking $config
 }
-
-def "main parsed_config" [] {
-  let config = get_parsed_config
-  echo $config | to yaml
-}
