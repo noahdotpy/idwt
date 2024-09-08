@@ -9,7 +9,78 @@ use ../config.nu *
 
 # TODO: Add documentation for commands
 
+# TODO: Figure out how I could possibly do an `idwt edit` to manage configuration for this.
+def "main apply-kwin" [] {
+    main apply kwin-block-windows (open /etc/idwt/config.yml)
+}
+
+def "main apply kwin-block-windows" [config: record] {
+    echo "## Applying: kwin-block-windows ##"
+
+    let group_prefix = "idwt-"
+
+    let users_affected = $config | get kwin-block-windows | columns
+    # TODO: find a way to cleanup all leftovers of an old IDWT configuration
+    for user in $users_affected {
+        let file = $"/home/($user)/.config/kwinrulesrc"
+
+        if (not ($file | path exists)) {
+          mkdir (dirname $file)
+          echo "" | save $file
+        }
+
+        let cleaned_rules = kreadconfig --file $file --group General --key rules | str replace -a -r 'idwt-.*' ''
+        kwriteconfig --file $file --group General --key rules $cleaned_rules
+
+        mut num = 0
+        for rule in ($config | get kwin-block-windows | get $user) {
+            let current_groups = rg $'\[($group_prefix)' $file | str replace "[" "" -a | str replace "]" "" -a | str replace "\n" " " -a | split row ' '
+
+            let group_name = $"($group_prefix)($num)"
+
+            kwriteconfig --file $file --group $group_name --key Description "Block Window - Automatically managed by IDWT"
+
+            if (is_property_defined $rule class) {
+                kwriteconfig --file $file --group $group_name --key wmclass ($rule | get class.value)
+                if (is_property_defined ($rule | get class) whole_window_class) and ($rule | get class.whole_window_class) {
+                    kwriteconfig --file $file --group $group_name --key wmclasscomplete "true"
+                }
+                kwriteconfig --file $file --group $group_name --key wmclassmatch (kwin_match_type_to_number ($rule | get class.match_type))
+            }
+            if (is_property_defined $rule title) {
+                kwriteconfig --file $file --group $group_name --key title ($rule | get title.value)
+                kwriteconfig --file $file --group $group_name --key titlematch (kwin_match_type_to_number ($rule | get title.match_type))
+            }
+            if (is_property_defined $rule role) {
+                kwriteconfig --file $file --group $group_name --key windowrole ($rule | get role.value)
+                kwriteconfig --file $file --group $group_name --key windowrolematch (kwin_match_type_to_number ($rule | get role.match_type))
+            }
+
+            # Always force minimize
+            kwriteconfig --file $file --group $group_name --key minimize true
+            kwriteconfig --file $file --group $group_name --key minimizerule 2
+
+            # Always force size to be 1x1 pixels
+            kwriteconfig --file $file --group $group_name --key size 1,1
+            kwriteconfig --file $file --group $group_name --key sizerule 2
+
+            # Do not obey geometry restrictions
+            kwriteconfig --file $file --group $group_name --key strictgeometryrule 2
+
+            let rules = kreadconfig --file $file --group General --key rules
+            kwriteconfig --file $file --group General --key rules $"($rules),($group_name)"
+
+            let count = kreadconfig --file $file --group General --key count | default 0
+            let count = if ($count | is-empty) {0} else {$count | into int}
+            kwriteconfig --file $file --group General --key count ($count + 1)
+            $num += 1
+        }
+    }
+}
+
 def "main apply chromium-blocked-urls" [config: record] {
+    echo "## Applying: chromium-blocked-urls ##"
+
     let policy = {URLBlocklist: ($config | get chromium.block-urls)}
     let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
 
@@ -20,10 +91,11 @@ def "main apply chromium-blocked-urls" [config: record] {
 def "main apply block-flatpak-networking" [config: record] {
     echo "## Applying: block-flatpak-networking ##"
 
-    let users_affected = $config | get block-flatpak-networking.users-affected
+    let users_affected = $config | get block-flatpak-networking | columns
+    
     for user in $users_affected {
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
-        let flatpaks_list = $config | get block-flatpak-networking.apps
+        let flatpaks_list = $config | get block-flatpak-networking | get $user
         mkdir $overrides_dir
         for file in (ls $"($overrides_dir)") {
             let file_name = echo $file | get name | path basename
@@ -34,11 +106,6 @@ def "main apply block-flatpak-networking" [config: record] {
                 echo $"INFO: Removed redundant flatpak override at '($override_file)'"
             }
         }
-
-        # if not (is_property_populated $config block-flatpak-networking) {
-        #     echo "INFO: No flatpaks listed, skipping"
-        #     return
-        # }
     
         for flatpak in $flatpaks_list {
             let file_contents = "# IDWT_REPLACEABLE: Remove line if you want this file to not be automatically overwritten\n[Context]\nshared=!network;"
@@ -131,6 +198,7 @@ def "main apply user-networking" [config: record] {
 def "main apply" [] {
     let config = get_parsed_config
 
+    main apply kwin-block-windows $config
     main apply block-hosts $config
     main apply block-flatpak-networking $config
     main apply chromium-blocked-urls $config

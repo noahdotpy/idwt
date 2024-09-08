@@ -8,7 +8,7 @@ COPY dev /
 ENTRYPOINT [ "/usr/bin/nu", "--config", "/etc/nushell/config.nu", "--env-config", "/etc/nushell/env.nu"]
 
 FROM fedora AS fedora-dev
-RUN dnf install nu e2fsprogs iptables -y
+RUN dnf install nu e2fsprogs iptables kde-runtime ripgrep yq -y
 RUN useradd john
 COPY src /
 COPY dev /

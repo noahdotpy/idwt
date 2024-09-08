@@ -1,13 +1,29 @@
+kwin-block-windows:
+  noah:
+    - class:
+        value: "chromium-browser Chromium-browser" # key wmclass
+        # whole_window_class: true # key wmclasscomplete
+        match_type: exact # key wmclassmatch - exact = 1, substring = 2, regex = 3
+      title:
+        value: "Picture in picture" # key title
+        match_type: exact # key titlematch - exact = 1, substring = 2, regex = 3
+      role:
+        value: "browser" # key windowrole
+        match_type: exact # key windowrolematch - exact = 1, substring = 2, regex = 3
+    - class:
+        value: "2nd"
+        match_type: exact
+      title:
+        value: "2ndtitl"
+        match_type: substring
 chromium:
   block-urls:
   - youtube.com
 block-hosts:
 - example.com
 block-flatpak-networking:
-  users-affected:
-  - john
-  apps:
-  - com.brave.Browser
+  john:
+    - com.brave.Browser
 user-networking:
   users:
     john:
