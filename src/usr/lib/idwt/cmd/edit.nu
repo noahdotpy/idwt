@@ -21,6 +21,8 @@ def "main edit group remove" [
     group_remove $user $group
 }
 
+# TODO: figure out how I could possibly add a rule for kwin-block-windows
+
 def "main edit config" [
     yq_eval_string: string # example: `.user-networking.users.john.mode = "block"`
 ] {

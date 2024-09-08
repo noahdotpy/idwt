@@ -9,26 +9,21 @@ use ../config.nu *
 
 # TODO: Add documentation for commands
 
-# TODO: Figure out how I could possibly do an `idwt edit` to manage configuration for this.
-def "main apply-kwin" [] {
-    main apply kwin-block-windows (open /etc/idwt/config.yml)
-}
-
 def "main apply kwin-block-windows" [config: record] {
     echo "## Applying: kwin-block-windows ##"
 
     let group_prefix = "idwt-"
 
     let users_affected = $config | get kwin-block-windows | columns
-    # TODO: find a way to cleanup all leftovers of an old IDWT configuration
     for user in $users_affected {
         let file = $"/home/($user)/.config/kwinrulesrc"
-
+        
         if (not ($file | path exists)) {
-          mkdir (dirname $file)
-          echo "" | save $file
+            mkdir (dirname $file)
+            echo "" | save $file
         }
-
+            
+        # TODO: find a way to cleanup all leftovers of an old IDWT configuration, instead of just the rules list
         let cleaned_rules = kreadconfig --file $file --group General --key rules | str replace -a -r 'idwt-.*' ''
         kwriteconfig --file $file --group General --key rules $cleaned_rules
 
