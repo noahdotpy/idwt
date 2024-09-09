@@ -9,68 +9,57 @@ use ../config.nu *
 
 # TODO: Add documentation for commands
 
+def "main apply-kwin" [] {
+    main apply kwin-block-windows (open /etc/idwt/config.yml)
+  }
+
 def "main apply kwin-block-windows" [config: record] {
     echo "## Applying: kwin-block-windows ##"
 
     let group_prefix = "idwt-"
 
-    let users_affected = $config | get kwin-block-windows | columns
-    for user in $users_affected {
-        let file = $"/home/($user)/.config/kwinrulesrc"
-        
-        if (not ($file | path exists)) {
-            mkdir (dirname $file)
-            echo "" | save $file
-        }
-            
-        # TODO: find a way to cleanup all leftovers of an old IDWT configuration, instead of just the rules list
-        let cleaned_rules = kreadconfig --file $file --group General --key rules | str replace -a -r 'idwt-.*' ''
-        kwriteconfig --file $file --group General --key rules $cleaned_rules
+    let file = "/etc/xdg/kwinrulesrc"
 
-        mut num = 0
-        for rule in ($config | get kwin-block-windows | get $user) {
-            let current_groups = rg $'\[($group_prefix)' $file | str replace "[" "" -a | str replace "]" "" -a | str replace "\n" " " -a | split row ' '
+    mut lines = [""]
 
-            let group_name = $"($group_prefix)($num)"
+    mut num = 0
+    # FIXME: Find a way to cleanup all sections starting with group_prefix before adding the rules, also change it to append instead of overwriting whole file
+    $lines = [...$lines "# IDWT MANAGED: FILE WILL BE CHANGED"]
+    for rule in ($config | get kwin-block-windows) {
+      $lines = [...$lines $"[($group_prefix)($num)][$i]"]
+      $lines = [...$lines $"Description=IDWT_FORCED ($num): Window disabled"]
 
-            kwriteconfig --file $file --group $group_name --key Description "Block Window - Automatically managed by IDWT"
+      if (is_property_defined $rule class) {
+          $lines = [...$lines $"wmclass=($rule | get class.value)"]
+          $lines = [...$lines $"wmclassmatch=(kwin_match_type_to_number ($rule | get class.match_type))"]
+          if (is_property_defined ($rule | get class) whole_window_class) and ($rule | get class.whole_window_class) {
+              $lines = [...$lines $"wmclasscomplete=true"]
+          }
+      }
+      if (is_property_defined $rule title) {
+          $lines = [...$lines $"title=($rule | get title.value)"]
+          $lines = [...$lines $"titlematch=(kwin_match_type_to_number ($rule | get title.match_type))"]
+      }
+      if (is_property_defined $rule role) {
+          $lines = [...$lines $"windowrole=($rule | get role.value)"]
+          $lines = [...$lines $"windowrolematch=(kwin_match_type_to_number ($rule | get role.match_type))"]
+      }
 
-            if (is_property_defined $rule class) {
-                kwriteconfig --file $file --group $group_name --key wmclass ($rule | get class.value)
-                if (is_property_defined ($rule | get class) whole_window_class) and ($rule | get class.whole_window_class) {
-                    kwriteconfig --file $file --group $group_name --key wmclasscomplete "true"
-                }
-                kwriteconfig --file $file --group $group_name --key wmclassmatch (kwin_match_type_to_number ($rule | get class.match_type))
-            }
-            if (is_property_defined $rule title) {
-                kwriteconfig --file $file --group $group_name --key title ($rule | get title.value)
-                kwriteconfig --file $file --group $group_name --key titlematch (kwin_match_type_to_number ($rule | get title.match_type))
-            }
-            if (is_property_defined $rule role) {
-                kwriteconfig --file $file --group $group_name --key windowrole ($rule | get role.value)
-                kwriteconfig --file $file --group $group_name --key windowrolematch (kwin_match_type_to_number ($rule | get role.match_type))
-            }
+      # Always force minimize
+      $lines = [...$lines $"minimize=true"]
+      $lines = [...$lines $"minimizerule=2"]
 
-            # Always force minimize
-            kwriteconfig --file $file --group $group_name --key minimize true
-            kwriteconfig --file $file --group $group_name --key minimizerule 2
+      # Always force size to be 1x1 pixels
+      $lines = [...$lines $"size=1,1"]
+      $lines = [...$lines $"sizerule=2"]
 
-            # Always force size to be 1x1 pixels
-            kwriteconfig --file $file --group $group_name --key size 1,1
-            kwriteconfig --file $file --group $group_name --key sizerule 2
+      # Do not obey geometry restrictions
+      $lines = [...$lines $"strictgeometryrule=2"]
 
-            # Do not obey geometry restrictions
-            kwriteconfig --file $file --group $group_name --key strictgeometryrule 2
-
-            let rules = kreadconfig --file $file --group General --key rules
-            kwriteconfig --file $file --group General --key rules $"($rules),($group_name)"
-
-            let count = kreadconfig --file $file --group General --key count | default 0
-            let count = if ($count | is-empty) {0} else {$count | into int}
-            kwriteconfig --file $file --group General --key count ($count + 1)
-            $num += 1
-        }
+      $num += 1
     }
+
+    $lines | str join "\n" | save -f $file 
 }
 
 def "main apply chromium-blocked-urls" [config: record] {
