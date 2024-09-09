@@ -152,12 +152,12 @@ def "main apply user-networking" [config: record] {
             let schedule = $schedules | get $schedule_name
 
             let days_allowed = $schedule | get days_allowed | each { |day| $day | str downcase }
-            let time_start = $schedule | get time_start
-            let time_end = $schedule | get time_end
+            let allow_start = $schedule | get allow_start
+            let allow_end = $schedule | get allow_end
 
             let current_day = ^date +%A | str downcase
             let current_time = ^date +%H:%M
-            if ($current_day in $days_allowed) and (current_time >= $time_start) and (current_time < $time_end) {
+            if ($current_day in $days_allowed) and ($current_time >= $allow_start) and ($current_time < $allow_end) {
                 echo $"INFO: Blocking internet connection for user '($username)'"
                 iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
                 ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
