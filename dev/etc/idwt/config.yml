@@ -15,11 +15,9 @@ kwin-block-windows:
     title:
       value: "2ndtitl"
       match_type: substring
-chromium:
-  block-urls:
-  - youtube.com
-block-hosts:
+block-sites:
 - example.com
+- youtube.com/watch
 block-flatpak-networking:
   john:
     - com.brave.Browser

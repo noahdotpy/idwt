@@ -9,11 +9,7 @@ use ../config.nu *
 
 # TODO: Add documentation for commands
 
-def "main apply-kwin" [] {
-    main apply kwin-block-windows (open /etc/idwt/config.yml)
-  }
-
-def "main apply kwin-block-windows" [config: record] {
+def "main apply-experimental kwin-block-windows" [config: record] {
     echo "## Applying: kwin-block-windows ##"
 
     let group_prefix = "idwt-"
@@ -62,16 +58,6 @@ def "main apply kwin-block-windows" [config: record] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply chromium-blocked-urls" [config: record] {
-    echo "## Applying: chromium-blocked-urls ##"
-
-    let policy = {URLBlocklist: ($config | get chromium.block-urls)}
-    let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
-
-    mkdir ($policy_file | path dirname)
-    $policy | to json | save -f $policy_file
-}
-
 def "main apply block-flatpak-networking" [config: record] {
     echo "## Applying: block-flatpak-networking ##"
 
@@ -110,8 +96,14 @@ def "main apply block-flatpak-networking" [config: record] {
     }
 }
 
-def "main apply block-hosts" [config: record] {
-    echo "## Applying: block-hosts ##"
+def "main apply block-sites" [config: record] {
+    echo "## Applying: block-sites ##"
+
+    let policy = {URLBlocklist: ($config | get block-sites)}
+    let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
+
+    mkdir ($policy_file | path dirname)
+    $policy | to json | save -f $policy_file
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
 
@@ -125,12 +117,12 @@ def "main apply block-hosts" [config: record] {
     echo "## THIS FILE MAY BE REPLACED AT ANY TIME AUTOMATICALLY ##" | save --force $hosts_file
     echo $"INFO: Saving hosts file at '($hosts_file)'"
 
-    if not (is_property_populated $config block-hosts) {
+    if not (is_property_populated $config block-sites) {
         echo "INFO: No hosts listed, skipping"
         return
     }
     
-    let hosts = $config | get block-hosts
+    let hosts = $config | get block-sites
     for host in $hosts {
         echo $"INFO: Added '($host)' to hosts file"
         echo $"\n0.0.0.0 ($host)\n" | save --append $hosts_file
@@ -182,9 +174,9 @@ def "main apply user-networking" [config: record] {
 def "main apply" [] {
     let config = get_parsed_config
 
-    main apply kwin-block-windows $config
-    main apply block-hosts $config
+    # TODO: Turn kwin-block-windows applying back on once its ready
+    # main apply kwin-block-windows $config
+    main apply block-sites $config
     main apply block-flatpak-networking $config
-    main apply chromium-blocked-urls $config
     main apply user-networking $config
 }
