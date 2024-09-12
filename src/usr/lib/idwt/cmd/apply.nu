@@ -9,7 +9,9 @@ use ../config.nu *
 
 # TODO: Add documentation for commands
 
-def "main apply-experimental kwin-block-windows" [config: record] {
+let config = get_parsed_config
+
+def "main apply-experimental kwin-block-windows" [] {
     echo "## Applying: kwin-block-windows ##"
 
     let group_prefix = "idwt-"
@@ -58,7 +60,7 @@ def "main apply-experimental kwin-block-windows" [config: record] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply block-flatpak-networking" [config: record] {
+def "main apply block-flatpak-networking" [] {
     echo "## Applying: block-flatpak-networking ##"
 
     let users_affected = $config | get block-flatpak-networking | columns
@@ -96,7 +98,7 @@ def "main apply block-flatpak-networking" [config: record] {
     }
 }
 
-def "main apply block-sites" [config: record] {
+def "main apply block-sites" [] {
     echo "## Applying: block-sites ##"
 
     let policy = {URLBlocklist: ($config | get block-sites)}
@@ -129,7 +131,7 @@ def "main apply block-sites" [config: record] {
     }
 }
 
-def "main apply user-networking" [config: record] {
+def "main apply user-networking" [] {
     echo "## Applying: user-networking ##"
 
     let nowifi_users = $config | get user-networking.users
@@ -172,11 +174,9 @@ def "main apply user-networking" [config: record] {
 }
 
 def "main apply" [] {
-    let config = get_parsed_config
-
     # TODO: Turn kwin-block-windows applying back on once its ready
-    # main apply kwin-block-windows $config
-    main apply block-sites $config
-    main apply block-flatpak-networking $config
-    main apply user-networking $config
+    # try {main apply kwin-block-windows}
+    try {main apply block-sites}
+    try {main apply block-flatpak-networking}
+    try {main apply user-networking}
 }
