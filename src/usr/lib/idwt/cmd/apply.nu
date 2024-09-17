@@ -170,7 +170,6 @@ def "main apply networking" [] {
                 echo $"INFO: Allowing internet connection for user '($username)'"
                 iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
                 ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
-                notify-send --app-name "IDWT" "Reboot May Be Required" "You may have to reboot to use internet again"
             }
         }
     }
