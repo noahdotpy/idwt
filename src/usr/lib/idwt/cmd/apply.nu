@@ -11,6 +11,8 @@ use ../config.nu *
 
 let config = get_parsed_config
 
+# TODO: Add name and id keys for kwin-block-windows to allow describing it in the system settings
+
 def "main apply-experimental kwin-block-windows" [] {
     echo "## Applying: kwin-block-windows ##"
 
@@ -19,11 +21,15 @@ def "main apply-experimental kwin-block-windows" [] {
     let file = "/etc/xdg/kwinrulesrc"
 
     mut lines = [""]
+    mut rules = []
 
     mut num = 0
-    # FIXME: Find a way to cleanup all sections starting with group_prefix before adding the rules, also change it to append instead of overwriting whole file
     $lines = [...$lines "# IDWT MANAGED: FILE WILL BE CHANGED"]
     for rule in ($config | get kwin-block-windows) {
+      $num += 1
+
+      $rules = [...$rules $"($group_prefix)($num)"]
+
       $lines = [...$lines $"[($group_prefix)($num)][$i]"]
       $lines = [...$lines $"Description=IDWT_FORCED ($num): Window disabled"]
 
@@ -53,9 +59,11 @@ def "main apply-experimental kwin-block-windows" [] {
 
       # Do not obey geometry restrictions
       $lines = [...$lines $"strictgeometryrule=2"]
-
-      $num += 1
     }
+
+    $lines = [...$lines $"[General][$i]"]
+    $lines = [...$lines $"count=($num)"]
+    $lines = [...$lines $"rules=($rules | str join ',')"]
 
     $lines | str join "\n" | save -f $file 
 }
