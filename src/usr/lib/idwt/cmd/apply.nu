@@ -16,21 +16,19 @@ let config = get_parsed_config
 def "main apply kwin-block-windows" [] {
     echo "## Applying: kwin-block-windows ##"
 
-    let group_prefix = "idwt-"
-
     let file = "/etc/xdg/kwinrulesrc"
 
     mut lines = ["# IDWT MANAGED: FILE WILL BE CHANGED"]
-    mut rules = []
 
-    mut num = 0
-    for rule in ($config | get kwin-block-windows) {
-      $num += 1
+    let rules = $config | get kwin-block-windows
+    mut rule_ids = $config | get kwin-block-windows | columns
 
-      $rules = [...$rules $"($group_prefix)($num)"]
+    for rule_id in $rule_ids {
 
-      $lines = [...$lines $"[($group_prefix)($num)][$i]"]
-      $lines = [...$lines $"Description=IDWT_FORCED ($num): Window disabled"]
+      let rule = $rules | get $rule_id
+
+      $lines = [...$lines $"[($rule_id)][$i]"]
+      $lines = [...$lines $"Description=IDWT Window Blocked: id=($rule_id)"]
 
       if (is_property_defined $rule class) {
           $lines = [...$lines $"wmclass=($rule | get class.value)"]
@@ -58,11 +56,13 @@ def "main apply kwin-block-windows" [] {
 
       # Do not obey geometry restrictions
       $lines = [...$lines $"strictgeometryrule=2"]
+
+      $lines = [...$lines ""]
     }
 
     $lines = [...$lines $"[General][$i]"]
-    $lines = [...$lines $"count=($num)"]
-    $lines = [...$lines $"rules=($rules | str join ',')"]
+    $lines = [...$lines $"count=($rule_ids | length)"]
+    $lines = [...$lines $"rules=($rule_ids | str join ',')"]
 
     $lines | str join "\n" | save -f $file 
 }
