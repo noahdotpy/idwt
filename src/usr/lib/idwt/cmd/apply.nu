@@ -13,18 +13,17 @@ let config = get_parsed_config
 
 # TODO: Add name and id keys for kwin-block-windows to allow describing it in the system settings
 
-def "main apply-experimental kwin-block-windows" [] {
+def "main apply kwin-block-windows" [] {
     echo "## Applying: kwin-block-windows ##"
 
     let group_prefix = "idwt-"
 
     let file = "/etc/xdg/kwinrulesrc"
 
-    mut lines = [""]
+    mut lines = ["# IDWT MANAGED: FILE WILL BE CHANGED"]
     mut rules = []
 
     mut num = 0
-    $lines = [...$lines "# IDWT MANAGED: FILE WILL BE CHANGED"]
     for rule in ($config | get kwin-block-windows) {
       $num += 1
 
@@ -182,8 +181,7 @@ def "main apply user-networking" [] {
 }
 
 def "main apply" [] {
-    # TODO: Turn kwin-block-windows applying back on once its ready
-    # try {main apply kwin-block-windows}
+    try {main apply kwin-block-windows}
     try {main apply block-sites}
     try {main apply block-flatpak-networking}
     try {main apply user-networking}
