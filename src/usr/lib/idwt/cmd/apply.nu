@@ -11,8 +11,6 @@ use ../config.nu *
 
 let config = get_parsed_config
 
-# TODO: Add name and id keys for kwin-block-windows to allow describing it in the system settings
-
 def "main apply kwin-block-windows" [] {
     echo "## Applying: kwin-block-windows ##"
 
