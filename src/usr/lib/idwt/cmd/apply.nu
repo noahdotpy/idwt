@@ -11,15 +11,15 @@ use ../config.nu *
 
 let config = get_parsed_config
 
-def "main apply kwin-block-windows" [] {
-    echo "## Applying: kwin-block-windows ##"
+def "main apply block-kwin-windows" [] {
+    echo "## Applying: block-kwin-windows ##"
 
     let file = "/etc/xdg/kwinrulesrc"
 
     mut lines = ["# IDWT MANAGED: FILE WILL BE CHANGED"]
 
-    let rules = $config | get kwin-block-windows
-    mut rule_ids = $config | get kwin-block-windows | columns
+    let rules = $config | get block-kwin-windows
+    mut rule_ids = $config | get block-kwin-windows | columns
 
     for rule_id in $rule_ids {
 
@@ -65,14 +65,14 @@ def "main apply kwin-block-windows" [] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply block-flatpak-networking" [] {
-    echo "## Applying: block-flatpak-networking ##"
+def "main apply disconnect-flatpak-apps" [] {
+    echo "## Applying: disconnect-flatpak-apps ##"
 
-    let users_affected = $config | get block-flatpak-networking | columns
+    let affected_users = $config | get affected-users
     
-    for user in $users_affected {
+    for user in $affected_users {
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
-        let flatpaks_list = $config | get block-flatpak-networking | get $user
+        let flatpaks_list = $config | get disconnect-flatpak-apps
         mkdir $overrides_dir
         for file in (ls $"($overrides_dir)") {
             let file_name = echo $file | get name | path basename
@@ -136,27 +136,25 @@ def "main apply block-sites" [] {
     }
 }
 
-def "main apply user-networking" [] {
-    echo "## Applying: user-networking ##"
+def "main apply networking" [] {
+    echo "## Applying: networking ##"
 
-    let nowifi_users = $config | get user-networking.users
-    let schedules = $config | get user-networking.schedules
+    let affected_users = $config | get affected-users
+    let schedules = $config | get networking.schedules
 
-    for username in ($nowifi_users | columns) {
-        let user = $nowifi_users | get $username
-        let mode = $user | get mode
+    for username in $affected_users {
+        let mode = $config | get networking.mode
         if $mode == "allow" {
             echo $"INFO: Allowing internet connection for user '($username)'"
             iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
             ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
-            notify-send --app-name "IDWT" "Reboot May Be Required" "You may have to reboot to use internet again"
         } else if $mode == "block" {
             echo $"INFO: Blocking internet connection for user '($username)'"
             iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
             ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
         } else if $mode == "schedule" {
-            let schedule_name = $user | get schedule
-            let schedule = $schedules | get $schedule_name
+            let schedule_name = $config | get networking.schedule
+            let schedule = $config | get networking.schedules | get $schedule_name
 
             let days_allowed = $schedule | get days_allowed | each { |day| $day | str downcase }
             let allow_start = $schedule | get allow_start
@@ -179,8 +177,8 @@ def "main apply user-networking" [] {
 }
 
 def "main apply" [] {
-    try {main apply kwin-block-windows}
+    try {main apply block-kwin-windows}
     try {main apply block-sites}
-    try {main apply block-flatpak-networking}
-    try {main apply user-networking}
+    try {main apply disconnect-flatpak-apps}
+    try {main apply networking}
 }
