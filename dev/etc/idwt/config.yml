@@ -28,3 +28,6 @@ tightener-config:
   - ^config \.chromium.block-urls \+= "[^"']*"$ # config '.chromium.block-urls += "youtube.com"'
   - ^config \.user-networking\.users\.noah\.mode = "block"$ # config ".user-networking.users.noah.mode = "block""
   - ^group remove noah wheel$
+
+  - ^config \.flatpak-app-networking\.allow-only \-= \["[^"']*\.[^"']*\.[^"']*"\]$ # config .flatpak-app-networking.allow-only -= ["org.signal.Signal"]
+  - ^config \.networking\.mode = "block"$
