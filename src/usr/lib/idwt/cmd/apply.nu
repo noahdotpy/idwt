@@ -65,14 +65,21 @@ def "main apply block-kwin-windows" [] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply disconnect-flatpak-apps" [] {
-    echo "## Applying: disconnect-flatpak-apps ##"
+def "main apply flatpak-app-networking" [] {
+    echo "## Applying: flatpak-app-networking ##"
 
     let affected_users = $config | get affected-users
     
     for user in $affected_users {
+        let flatpaks_list = if (is_property_populated ($config | get flatpak-app-networking.allow-only)) {
+          # the following code takes out any app ids that are in allow-only
+          let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
+          $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow-only))}
+        } else {
+          $config | get flatpak-app-networking.block
+        }
+
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
-        let flatpaks_list = $config | get disconnect-flatpak-apps
         mkdir $overrides_dir
         for file in (ls $"($overrides_dir)") {
             let file_name = echo $file | get name | path basename
@@ -178,6 +185,6 @@ def "main apply networking" [] {
 def "main apply" [] {
     try {main apply block-kwin-windows}
     try {main apply block-sites}
-    try {main apply disconnect-flatpak-apps}
+    try {main apply flatpak-app-networking}
     try {main apply networking}
 }
