@@ -6,8 +6,12 @@ block-kwin-windows:
 block-sites:
 - example.com
 - youtube.com/watch
-disconnect-flatpak-apps:
-  - com.brave.Browser
+flatpak-app-networking:
+  allow-only: # when allow-only is populated then only these apps are allowed
+    - com.spotify.Client
+    - org.signal.Signal
+  block:
+    - com.brave.Browser
 networking:
   mode: allow
   schedules:
