@@ -71,8 +71,9 @@ def "main apply flatpak-app-networking" [] {
     let affected_users = $config | get affected-users
     
     for user in $affected_users {
-        let flatpaks_list = if (is_property_populated ($config | get flatpak-app-networking.allow-only)) {
+        let flatpaks_list = if (is_property_defined ($config | get flatpak-app-networking) allow-only) {
           # the following code takes out any app ids that are in allow-only
+          # leaving the remaining to be blocked
           let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
           $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow-only))}
         } else {
@@ -131,7 +132,7 @@ def "main apply block-sites" [] {
     echo "## THIS FILE MAY BE REPLACED AT ANY TIME AUTOMATICALLY ##" | save --force $hosts_file
     echo $"INFO: Saving hosts file at '($hosts_file)'"
 
-    if not (is_property_populated $config block-sites) {
+    if not (is_property_defined $config block-sites) {
         echo "INFO: No hosts listed, skipping"
         return
     }
