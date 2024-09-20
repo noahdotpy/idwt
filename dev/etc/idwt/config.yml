@@ -31,3 +31,4 @@ tightener-config:
 
   - ^config \.flatpak-app-networking\.allow-only \-= \["[^"']*\.[^"']*\.[^"']*"\]$ # config .flatpak-app-networking.allow-only -= ["org.signal.Signal"]
   - ^config \.networking\.mode = "block"$
+  - ^make_file_immutable .*$
