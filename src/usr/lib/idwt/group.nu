@@ -6,7 +6,7 @@ export def group_add [
     user: string,
     group: string,
 ] {
-    usermod -aG $group $user
+    /usr/sbin/usermod -aG $group $user
 }
 
 export def group_remove [
@@ -14,6 +14,6 @@ export def group_remove [
     group: string,
 ] {
     if (groups $user) =~ $group {
-        gpasswd -d $user $group
+        /usr/bin/gpasswd -d $user $group
     }
 }

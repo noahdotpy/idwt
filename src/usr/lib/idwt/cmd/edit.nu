@@ -7,6 +7,12 @@ use ../group.nu *
 
 # TODO: Add documentation for commands
 
+def "main edit make_file_immutable" [
+  path: string
+] {
+  /usr/bin/chattr +i $path
+}
+
 def "main edit group add" [
     user: string,
     group: string,
