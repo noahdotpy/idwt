@@ -12,7 +12,7 @@ use ../config.nu *
 let config = get_parsed_config
 
 def "main apply block-kwin-windows" [] {
-    echo "## Applying: block-kwin-windows ##"
+    print "## Applying: block-kwin-windows ##"
 
     let file = "/etc/xdg/kwinrulesrc"
 
@@ -66,7 +66,7 @@ def "main apply block-kwin-windows" [] {
 }
 
 def "main apply flatpak-app-networking" [] {
-    echo "## Applying: flatpak-app-networking ##"
+    print "## Applying: flatpak-app-networking ##"
 
     let affected_users = $config | get affected-users
     
@@ -88,7 +88,7 @@ def "main apply flatpak-app-networking" [] {
             if ((open $override_file) =~ "# IDWT_REPLACEABLE" and ($file_name in $flatpaks_list) == false) {
                 chattr -i $override_file
                 rm $override_file
-                echo $"INFO: Removed redundant flatpak override at '($override_file)'"
+                print $"INFO: Removed redundant flatpak override at '($override_file)'"
             }
         }
     
@@ -103,16 +103,16 @@ def "main apply flatpak-app-networking" [] {
                 chattr -i $override_file
                 echo $file_contents | save --force $override_file
                 chattr +i $override_file
-                echo $"INFO: Created flatpak override at '($override_file)'"
+                print $"INFO: Created flatpak override at '($override_file)'"
             } else {
-                echo $"INFO: Skipping overwriting ($override_file)"
+                print $"INFO: Skipping overwriting ($override_file)"
             }
         }
     }
 }
 
 def "main apply block-sites" [] {
-    echo "## Applying: block-sites ##"
+    print "## Applying: block-sites ##"
 
     let policy = {URLBlocklist: ($config | get block-sites)}
     let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
@@ -130,22 +130,22 @@ def "main apply block-sites" [] {
         rm $hosts_file
     }
     echo "## THIS FILE MAY BE REPLACED AT ANY TIME AUTOMATICALLY ##" | save --force $hosts_file
-    echo $"INFO: Saving hosts file at '($hosts_file)'"
+    print $"INFO: Saving hosts file at '($hosts_file)'"
 
     if not (is_property_defined $config block-sites) {
-        echo "INFO: No hosts listed, skipping"
+        print "INFO: No hosts listed, skipping"
         return
     }
     
     let hosts = $config | get block-sites
     for host in $hosts {
-        echo $"INFO: Added '($host)' to hosts file"
+        print $"INFO: Added '($host)' to hosts file"
         echo $"\n0.0.0.0 ($host)\n" | save --append $hosts_file
     }
 }
 
 def "main apply networking" [] {
-    echo "## Applying: networking ##"
+    print "## Applying: networking ##"
 
     let affected_users = $config | get affected-users
     let schedules = $config | get networking.schedules
@@ -153,11 +153,11 @@ def "main apply networking" [] {
     for username in $affected_users {
         let mode = $config | get networking.mode
         if $mode == "allow" {
-            echo $"INFO: Allowing internet connection for user '($username)'"
+            print $"INFO: Allowing internet connection for user '($username)'"
             iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
             ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
         } else if $mode == "block" {
-            echo $"INFO: Blocking internet connection for user '($username)'"
+            print $"INFO: Blocking internet connection for user '($username)'"
             iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
             ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
         } else if $mode == "schedule" {
@@ -171,11 +171,11 @@ def "main apply networking" [] {
             let current_day = ^date +%A | str downcase
             let current_time = ^date +%H:%M
             if ($current_day in $days_allowed) and ($current_time >= $allow_start) and ($current_time < $allow_end) {
-                echo $"INFO: Blocking internet connection for user '($username)'"
+                print $"INFO: Blocking internet connection for user '($username)'"
                 iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
                 ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
             } else {
-                echo $"INFO: Allowing internet connection for user '($username)'"
+                print $"INFO: Allowing internet connection for user '($username)'"
                 iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
                 ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
             }
