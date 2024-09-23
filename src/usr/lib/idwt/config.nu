@@ -4,7 +4,7 @@
 
 use ./constants.nu *
 
-export def "get_parsed_config" [] {
+export def "get_parsed_config" [--yaml] {
   let config = if (echo $default_config_file | path exists) {
     yq eval '.' $default_config_file
   } else ''
@@ -17,5 +17,10 @@ export def "get_parsed_config" [] {
     echo $config | yq eval $". *+ load\("($persistent_config_file)"\)"
   } else $config
 
-  return ($config | from yaml)
+  if $yaml {
+    return $config
+  } else {
+    return ($config | from yaml)
+  }
+
 }
