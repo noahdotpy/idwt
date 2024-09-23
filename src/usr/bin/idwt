@@ -4,6 +4,7 @@
 
 source ../lib/idwt/cmd/apply.nu
 source ../lib/idwt/cmd/edit.nu
+source ../lib/idwt/cmd/get_config.nu
 source ../lib/idwt/cmd/tighten.nu
 
 # TODO: investigate schema validation for config.yml
