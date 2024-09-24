@@ -119,6 +119,7 @@ def "main apply block-sites" [] {
 
     mkdir ($policy_file | path dirname)
     $policy | to json | save -f $policy_file
+    $policy | to json | save -f ($policy_file | | str replace "chromium" "brave")
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
 
