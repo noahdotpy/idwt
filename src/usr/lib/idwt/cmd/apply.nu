@@ -68,7 +68,7 @@ def "main apply block-kwin-windows" [] {
 def "main apply flatpak-app-networking" [] {
     print "## Applying: flatpak-app-networking ##"
 
-    let affected_users = $config | get affected-users
+    let affected_users = $config | try {get affected-users} | default []
     
     for user in $affected_users {
         let flatpaks_list = if (is_property_defined ($config | get flatpak-app-networking) allow-only) {
@@ -76,9 +76,9 @@ def "main apply flatpak-app-networking" [] {
           # leaving the remaining to be blocked
           let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
           $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow-only))}
-        } else {
-          $config | get flatpak-app-networking.block
-        }
+        } else { [] }
+
+        let flatpaks_list = $flatpaks_list | append ($config | get flatpak-app-networking.block)
 
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
         mkdir $overrides_dir
@@ -119,7 +119,7 @@ def "main apply block-sites" [] {
 
     mkdir ($policy_file | path dirname)
     $policy | to json | save -f $policy_file
-    $policy | to json | save -f ($policy_file | | str replace "chromium" "brave")
+    $policy | to json | save -f ($policy_file | str replace "chromium" "brave")
     
     let hosts_file = "/etc/hosts.d/idwt-blocked.conf"
 
