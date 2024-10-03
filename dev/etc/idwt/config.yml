@@ -7,7 +7,7 @@ block-sites:
 - example.com
 - youtube.com/watch
 flatpak-app-networking:
-  allow-only: # when allow-only is populated then only these apps are allowed
+  allow-only: # when allow-only is populated then only these apps are allowed unless blocked specifically down below
     - com.spotify.Client
     - org.signal.Signal
     - com.github.marhkb.Pods
