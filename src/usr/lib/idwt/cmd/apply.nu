@@ -11,6 +11,23 @@ use ../config.nu *
 
 let config = get_parsed_config
 
+def "main apply delayed_rules" [] {
+  print "## Applying: delayed rules ##"
+
+  let delayed_rules = cat $delayed_rules_file | from yaml
+  let current_time = ^/usr/bin/date +%s | into int
+
+  for rule in $delayed_rules {
+    if $current_time >= ($rule.time_to_apply | into int) {
+        ^$idwt_bin edit ...$rule.command
+
+        # remove this from the list
+        let delayed_rules = $delayed_rules | filter {|el| $el != $rule}
+        $delayed_rules | to yaml | save -f $delayed_rules_file
+      }
+  }
+}
+
 def "main apply block-kwin-windows" [] {
     print "## Applying: block-kwin-windows ##"
 
@@ -189,4 +206,5 @@ def "main apply" [] {
     try {main apply block-sites}
     try {main apply flatpak-app-networking}
     try {main apply networking}
+    try {main apply delayed_rules}
 }

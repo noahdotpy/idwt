@@ -6,6 +6,8 @@ use ../constants.nu *
 
 
 # Tighten executes `idwt edit {command}` under the hood.
+# Tighten should always be used instead of edit, unless the current user has super-user privileges.
+# A delay-system like Plucky filter is used in tighten for commands which are not allowed to be tightened immediately if delay feature is enabled.
 # `/usr/libexec/idwt/tighten-apply.nu` should be allowed for any user in idwt-tightener group.
 #   - This can be done with a sudoers file (example file location: /etc/sudoers.d/allow-idwtn).
 #   - An example for the contents of this file is below:

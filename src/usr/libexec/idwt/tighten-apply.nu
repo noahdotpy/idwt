@@ -15,11 +15,20 @@ let tightener_config = $config | get tightener-config
 let approved_commands = $tightener_config | get approved-commands
 
 if not (regex_matches_with_any $approved_commands $command_str) {
-    print $"ERROR: ($command_str) is not in approved tightener commands"
-    rm $tighten_temp_file
-    exit 1
-}
+    if ($config | try {get delay} | default (-1 | into int)) == -1 {
+      print $"ERROR: ($command_str) is not in approved tightener commands and no delay is used"
+      rm $tighten_temp_file
+      exit 1
+    }
 
-^$idwt_bin edit ...$command
+    print $"INFO: ($command_str) is not in approved tightener commands - using delay feature at ($config | get delay) seconds instead"
+    let current_time = ^date +%s | into int
+    let delayed_time = $current_time + ($config | get delay)
+    let delayed_rules = try {cat $delayed_rules_file | from yaml} | default []
+    let new_file_contents = $delayed_rules | append {command: $command, time_to_apply: $delayed_time} | to yaml
+    $new_file_contents | save -f $delayed_rules_file
+} else {
+  ^$idwt_bin edit ...$command
+}
 
 rm $tighten_temp_file

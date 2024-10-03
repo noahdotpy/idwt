@@ -21,6 +21,7 @@ networking:
       allow_start: 8:30
       allow_end: 15:00
 affected-users: [noah]
+delay: 30 # unit is seconds - meaning a delay of 1.5 minutes is used if 90 is the value
 tightener-config:
   approved-commands:
   - ^config \.block-hosts \+= "[a-zA-Z0-9.]*"$ # config '.block-hosts += "youtube.com"'
