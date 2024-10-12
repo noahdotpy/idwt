@@ -189,13 +189,13 @@ def "main apply networking" [] {
             let current_day = ^date +%A | str downcase
             let current_time = ^date +%H:%M
             if ($current_day in $days_allowed) and ($current_time >= $allow_start) and ($current_time < $allow_end) {
-                print $"INFO: Blocking internet connection for user '($username)'"
-                iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
-                ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
-            } else {
                 print $"INFO: Allowing internet connection for user '($username)'"
                 iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
                 ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
+            } else {
+                print $"INFO: Blocking internet connection for user '($username)'"
+                iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
+                ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
             }
         }
     }
