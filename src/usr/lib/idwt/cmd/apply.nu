@@ -11,6 +11,36 @@ use ../config.nu *
 
 let config = get_parsed_config
 
+def "main apply block-binaries" [] {
+  # NOTICE: TO BE RUN AS USER
+  # let banned_exec_dirs = [
+  #   "/home/noah/"
+  #   "/dev/"
+  #   "/mnt/"
+  #   "/media/"
+  #   "/run/"
+  #   "/tmp/"
+  #   "/var/home/noah/"
+  #   "/var/dev/"
+  #   "/var/mnt/"
+  #   "/var/media/"
+  #   "/var/run/"
+  #   "/var/var/"
+  #   "/var/tmp/"
+  # ]
+  
+  let banned_exec_dirs = $config | get block-binaries
+
+  let banned_processes = ps | where $it.name =~ ($banned_exec_dirs | str join "|")
+
+  print $banned_processes
+
+  for process in $banned_processes {
+    try { kill --force $process.pid }
+    # try {notify-send --app-name "IDWT" "Killed Execution of Binary" $"Process with name `($process.name)` was killed forcefully." --urgency=critical}
+  }
+}
+
 def "main apply delayed_rules" [] {
   print "## Applying: delayed rules ##"
 
@@ -203,6 +233,7 @@ def "main apply networking" [] {
 
 def "main apply" [] {
     try {main apply block-kwin-windows}
+    try {main apply block-binaries}
     try {main apply block-sites}
     try {main apply flatpak-app-networking}
     try {main apply networking}

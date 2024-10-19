@@ -1,3 +1,5 @@
+block-binaries:
+  - /var/home/noah
 block-kwin-windows:
   block-pip:
     title:
