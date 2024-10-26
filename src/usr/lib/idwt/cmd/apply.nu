@@ -12,6 +12,8 @@ use ../config.nu *
 let config = get_parsed_config
 
 def "main apply process-killing" [] {
+  print "## Applying: process killing ##"
+
   # process-killing:
   #   allow-always:
   #     /home/noah/.local/share/activitywatch/aw-qt: dsjd9asudeu843j # sha256sum of the file at $location
@@ -32,16 +34,16 @@ def "main apply process-killing" [] {
     let real_sha = sha256sum $location | split row '  '
     let expected_sha = $allow_always | get $location
     if $real_sha == $expected_sha {
-      try { $kill_list = $kill_list | filter {|e| $e != $location} }
+      $kill_list = $kill_list | default [] | filter {|e| $e != $location}
     }
   }
 
   print $kill_list
 
-  for process_pid in ($ps_data | where name in $kill_list | get pid) {
-    try { kill --force $process_pid }
+  for process in ($ps_data | where name in $kill_list) {
+    try { kill --force $process.pid }
     for user in ($config | get affected-users) {
-      try {sudo --user $user notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical}
+      sudo --user $user notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical
     }
   }
 }
@@ -64,7 +66,7 @@ def "main apply delayed_rules" [] {
 }
 
 def "main apply block-kwin-windows" [] {
-    print "## Applying: block-kwin-windows ##"
+    print "## Applying: block kwin windows ##"
 
     let file = "/etc/xdg/kwinrulesrc"
 
@@ -118,7 +120,7 @@ def "main apply block-kwin-windows" [] {
 }
 
 def "main apply flatpak-app-networking" [] {
-    print "## Applying: flatpak-app-networking ##"
+    print "## Applying: flatpak app networking ##"
 
     let affected_users = $config | try {get affected-users} | default []
     
@@ -164,7 +166,7 @@ def "main apply flatpak-app-networking" [] {
 }
 
 def "main apply block-sites" [] {
-    print "## Applying: block-sites ##"
+    print "## Applying: block sites ##"
 
     let policy = {URLBlocklist: ($config | get block-sites)}
     let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"

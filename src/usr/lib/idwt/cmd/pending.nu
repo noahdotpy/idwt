@@ -48,5 +48,3 @@ def "main pending" [] {
     $idx += 1
   }
 }
-
-def main [] {}
