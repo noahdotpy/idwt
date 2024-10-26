@@ -39,7 +39,7 @@ def "main pending" [] {
   mut idx = 1
   for rule in $pending {
     let real_time = how_long_until $rule.time_to_apply
-    let command = $'["($rule.command | str join '", "')"]'
+    let command = $'['($rule.command | str join "', '")']'
 
     let padding = " " | repeat ($idx | into string | str length) | str join
 
