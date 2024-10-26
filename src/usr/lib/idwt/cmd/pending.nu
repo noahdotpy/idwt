@@ -38,7 +38,7 @@ def "main pending" [] {
   for rule in $pending {
     let real_time = how_long_until $rule.time_to_apply
     let command = $'["($rule.command | str join '", "')"]'
-    print $'1:  command: ($command)'
+    print $'($idx):  command: ($command)'
     print $'    applying in: ($real_time)'
     $idx += 1
   }
