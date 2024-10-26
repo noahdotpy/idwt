@@ -40,6 +40,9 @@ def "main apply process-killing" [] {
 
   for process_pid in ($ps_data | where name in $kill_list | get pid) {
     try { kill --force $process_pid }
+    for user in ($config | get affected-users) {
+      try {sudo --user $user notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical}
+    }
   }
 }
 
