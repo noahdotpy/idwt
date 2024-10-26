@@ -15,7 +15,7 @@ let tightener_config = $config | get tightener
 let approved_commands = $tightener_config | get approved-commands
 
 if not (regex_matches_with_any $approved_commands $command_str) {
-    if ($tightener_config | try {get delay} | default (-1 | into int)) == -1 {
+    if not ($tightener_config | try {get delay-enabled} | default false) {
       print $"ERROR: ($command_str) is not in approved tightener commands and no delay is used"
       rm $tighten_temp_file
       exit 1
