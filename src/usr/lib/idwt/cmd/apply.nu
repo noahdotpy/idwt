@@ -11,33 +11,35 @@ use ../config.nu *
 
 let config = get_parsed_config
 
-def "main apply block-binaries" [] {
-  # NOTICE: TO BE RUN AS USER
-  # let banned_exec_dirs = [
-  #   "/home/noah/"
-  #   "/dev/"
-  #   "/mnt/"
-  #   "/media/"
-  #   "/run/"
-  #   "/tmp/"
-  #   "/var/home/noah/"
-  #   "/var/dev/"
-  #   "/var/mnt/"
-  #   "/var/media/"
-  #   "/var/run/"
-  #   "/var/var/"
-  #   "/var/tmp/"
-  # ]
+def "main apply process-killing" [] {
+  # process-killing:
+  #   allow-always:
+  #     /home/noah/.local/share/activitywatch/aw-qt: dsjd9asudeu843j # sha256sum of the file at $location
+  #   block:
+  #     - /home/noah
+ 
+  let block = $config | get process-killing.block
+  let allow_always = $config | get process-killing.allow-always
+
+  let ps_data = ps
   
-  let banned_exec_dirs = $config | get block-binaries
+  mut kill_list = []
+  for regex in $block {
+    $kill_list = $kill_list | append ($ps_data | get name | find --regex $regex)
+  }
 
-  let banned_processes = ps | where $it.name =~ ($banned_exec_dirs | str join "|")
+  for location in ($allow_always | columns) {
+    let real_sha = sha256sum $location | split row '  '
+    let expected_sha = $allow_always | get $location
+    if $real_sha == $expected_sha {
+      $kill_list = $kill_list | filter {|e| $e != $location}
+    }
+  }
 
-  print $banned_processes
+  print $kill_list
 
-  for process in $banned_processes {
-    try { kill --force $process.pid }
-    # try {notify-send --app-name "IDWT" "Killed Execution of Binary" $"Process with name `($process.name)` was killed forcefully." --urgency=critical}
+  for process_pid in ($ps_data | where name in $kill_list | get pid) {
+    try { kill --force $process_pid }
   }
 }
 
@@ -233,7 +235,7 @@ def "main apply networking" [] {
 
 def "main apply" [] {
     try {main apply block-kwin-windows}
-    try {main apply block-binaries}
+    try {main apply process-killing}
     try {main apply block-sites}
     try {main apply flatpak-app-networking}
     try {main apply networking}
