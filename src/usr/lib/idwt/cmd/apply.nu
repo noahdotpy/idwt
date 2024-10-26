@@ -32,7 +32,7 @@ def "main apply process-killing" [] {
     let real_sha = sha256sum $location | split row '  '
     let expected_sha = $allow_always | get $location
     if $real_sha == $expected_sha {
-      $kill_list = $kill_list | filter {|e| $e != $location}
+      try { $kill_list = $kill_list | filter {|e| $e != $location} }
     }
   }
 
