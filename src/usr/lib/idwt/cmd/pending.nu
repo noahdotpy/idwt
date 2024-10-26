@@ -4,6 +4,8 @@
 
 use ../constants.nu *
 
+use std repeat
+
 def "how_long_until" [date: int] {
   let minute = 60
   let hour = $minute * 60
@@ -38,8 +40,13 @@ def "main pending" [] {
   for rule in $pending {
     let real_time = how_long_until $rule.time_to_apply
     let command = $'["($rule.command | str join '", "')"]'
-    print $'($idx):  command: ($command)'
-    print $'    applying in: ($real_time)'
+
+    let padding = " " | repeat ($idx | into string | str length) | str join
+
+    print $'($idx): command: ($command)'
+    print $'($padding)  applying in: ($real_time)'
     $idx += 1
   }
 }
+
+def main [] {}
