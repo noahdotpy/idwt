@@ -11,6 +11,8 @@ use ../config.nu *
 
 let config = get_parsed_config
 
+def main [] {}
+
 def "main apply process-killing" [] {
   print "## Applying: process killing ##"
 
@@ -20,14 +22,14 @@ def "main apply process-killing" [] {
   #   block:
   #     - /home/noah
  
-  let block = $config | get process-killing.block
-  let allow_always = $config | get process-killing.allow-always
+  let block = $config | try { get process-killing.block } | default []
+  let allow_always = $config | try { get process-killing.allow-always } | default []
 
-  let ps_data = ps
+  let ps_data = ps | default []
   
   mut kill_list = []
   for regex in $block {
-    $kill_list = $kill_list | append ($ps_data | get name | find --regex $regex)
+    $kill_list = [...$kill_list ...($ps_data | get name | find --regex $regex)]
   }
 
   for location in ($allow_always | columns) {
@@ -72,8 +74,8 @@ def "main apply block-kwin-windows" [] {
 
     mut lines = ["# IDWT MANAGED: FILE WILL BE CHANGED"]
 
-    let rules = $config | get block-kwin-windows
-    mut rule_ids = $config | get block-kwin-windows | columns
+    let rules = $config | try { get block-kwin-windows } | default []
+    mut rule_ids = $config | try { get block-kwin-windows} | default {} | columns
 
     for rule_id in $rule_ids {
 
@@ -122,7 +124,7 @@ def "main apply block-kwin-windows" [] {
 def "main apply flatpak-app-networking" [] {
     print "## Applying: flatpak app networking ##"
 
-    let affected_users = $config | try {get affected-users} | default []
+    let affected_users = $config | try { get affected-users } | default []
     
     for user in $affected_users {
         let flatpaks_list = if (is_property_defined ($config | get flatpak-app-networking) allow-only) {
@@ -132,7 +134,7 @@ def "main apply flatpak-app-networking" [] {
           $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow-only))}
         } else { [] }
 
-        let flatpaks_list = $flatpaks_list | append ($config | get flatpak-app-networking.block)
+        let flatpaks_list = $flatpaks_list | append ($config | try { get flatpak-app-networking.block } | default [])
 
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
         mkdir $overrides_dir
@@ -168,7 +170,9 @@ def "main apply flatpak-app-networking" [] {
 def "main apply block-sites" [] {
     print "## Applying: block sites ##"
 
-    let policy = {URLBlocklist: ($config | get block-sites)}
+    let sites = $config | try { get block-sites } | default []
+
+    let policy = {URLBlocklist: ($sites)}
     let policy_file = "/etc/chromium/policies/managed/idwt-auto-managed.json"
 
     mkdir ($policy_file | path dirname)
@@ -192,8 +196,7 @@ def "main apply block-sites" [] {
         return
     }
     
-    let hosts = $config | get block-sites
-    for host in $hosts {
+    for site in $sites {
         print $"INFO: Added '($host)' to hosts file"
         echo $"\n0.0.0.0 ($host)\n" | save --append $hosts_file
     }
@@ -203,10 +206,9 @@ def "main apply networking" [] {
     print "## Applying: networking ##"
 
     let affected_users = $config | get affected-users
-    let schedules = $config | get networking.schedules
 
     for username in $affected_users {
-        let mode = $config | get networking.mode
+        let mode = $config | try { get networking.mode } | default "allow"
         if $mode == "allow" {
             print $"INFO: Allowing internet connection for user '($username)'"
             iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
@@ -216,6 +218,8 @@ def "main apply networking" [] {
             iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
             ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
         } else if $mode == "schedule" {
+            let schedules = $config | get networking.schedules
+
             let schedule_name = $config | get networking.schedule
             let schedule = $config | get networking.schedules | get $schedule_name
 
