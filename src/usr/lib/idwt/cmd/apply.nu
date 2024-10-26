@@ -140,7 +140,7 @@ def "main apply flatpak-app-networking" [] {
         }
     
         for flatpak in $flatpaks_list {
-            let file_contents = "# IDWT_REPLACEABLE: Remove line if you want this file to not be automatically overwritten\n[Context]\nshared=!network;"
+            let file_contents = "# IDWT_REPLACEABLE: Remove this line if you don't want this file to be automatically overwritten at any time\n[Context]\nshared=!network;"
             let override_file = $"($overrides_dir)/($flatpak)"
 
             if not ($override_file | path exists) {
