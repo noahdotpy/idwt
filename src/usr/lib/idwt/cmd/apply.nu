@@ -11,8 +11,6 @@ use ../config.nu *
 
 let config = get_parsed_config
 
-def main [] {}
-
 def "main apply process-killing" [] {
   print "## Applying: process killing ##"
 
