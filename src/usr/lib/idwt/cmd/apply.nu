@@ -27,7 +27,7 @@ def "main apply process-killing" [] {
   
   mut kill_list = []
   for regex in $block {
-    $kill_list = [...$kill_list ...($ps_data | get name | find --regex $regex)]
+    $kill_list = [...$kill_list ...($ps_data | get name | filter {|e| does_regex_match $e $regex})]
   }
 
   for location in ($allow_always | columns) {
@@ -195,8 +195,8 @@ def "main apply block-sites" [] {
     }
     
     for site in $sites {
-        print $"INFO: Added '($host)' to hosts file"
-        echo $"\n0.0.0.0 ($host)\n" | save --append $hosts_file
+        print $"INFO: Added '($site)' to hosts file"
+        echo $"\n0.0.0.0 ($site)\n" | save --append $hosts_file
     }
 }
 

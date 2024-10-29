@@ -14,7 +14,7 @@ export def does_regex_match [
     value: string
     regex: string
 ] -> bool {
-    not (echo $value | find --regex $regex | is-empty)
+    not ($value | find --regex $regex | is-empty)
 }
 
 export def regex_matches_with_any [
