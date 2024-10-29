@@ -15,13 +15,16 @@ def "main apply process-killing" [] {
   print "## Applying: process killing ##"
 
   # process-killing:
-  #   allow-always:
+  #   allow: # allow has priority over block in all occasions
+  #     - /home/noah/.local/share/activitywatch/aw-qt
+  #   allow-shas:
   #     /home/noah/.local/share/activitywatch/aw-qt: dsjd9asudeu843j # sha256sum of the file at $location
   #   block:
   #     - /home/noah
  
   let block = $config | try { get process-killing.block } | default []
-  let allow_always = $config | try { get process-killing.allow-always } | default []
+  let allow = $config | try { get process-killing.allow } | default []
+  let allow_shas = $config | try { get process-killing.allow-shas } | default []
 
   let ps_data = ps | default []
   
@@ -30,9 +33,13 @@ def "main apply process-killing" [] {
     $kill_list = [...$kill_list ...($ps_data | get name | filter {|e| does_regex_match $e $regex})]
   }
 
-  for location in ($allow_always | columns) {
-    let real_sha = sha256sum $location | split row '  '
-    let expected_sha = $allow_always | get $location
+  for regex in $allow {
+    $kill_list = $kill_list | filter {|e| not (does_regex_match $e $regex)}
+  }
+
+  for location in ($allow_shas | columns) {
+    let real_sha = sha256sum $location | split row '  ' | trim
+    let expected_sha = sha256sum ($allow_shas | get $location) | trim
     if $real_sha == $expected_sha {
       $kill_list = $kill_list | default [] | filter {|e| $e != $location}
     }
