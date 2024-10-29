@@ -34,7 +34,7 @@ def "main apply process-killing" [] {
   }
 
   for regex in $allow {
-    $kill_list = $kill_list | filter {|e| not (does_regex_match $e $regex)}
+    $kill_list = $kill_list | default [] | filter {|e| not (does_regex_match $e $regex)}
   }
 
   for location in ($allow_shas | columns) {
