@@ -130,13 +130,15 @@ def "main apply flatpak-app-networking" [] {
     print "## Applying: flatpak app networking ##"
 
     let affected_users = $config | try { get affected-users } | default []
+
+    
     
     for user in $affected_users {
-        let flatpaks_list = if (is_property_defined ($config | get flatpak-app-networking) allow-only) {
-          # the following code takes out any app ids that are in allow-only
+        let flatpaks_list = if ($config | try { get flatpak-app-networking.block-otherwise } | default false) {
+          # the following code takes out any app ids that are in allow
           # leaving the remaining to be blocked
           let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
-          $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow-only))}
+          $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow))}
         } else { [] }
 
         let flatpaks_list = $flatpaks_list | append ($config | try { get flatpak-app-networking.block } | default [])
