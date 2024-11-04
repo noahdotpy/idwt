@@ -4,17 +4,26 @@
 
 use ./constants.nu *
 
-export def "get_parsed_config" [--yaml] {
-  let config = if (echo $default_config_file | path exists) {
-    yq eval '.' $default_config_file
-  } else ''
+# *    = merge, no append
+# *+   = merge, and append
 
-  let config = if (echo $etc_config_file | path exists) {
-    echo $config | yq eval $". * load\("($etc_config_file)"\)"
+export def "get_parsed_config" [--yaml] {
+  mut config = ''
+
+  $config = if ($default_config_file | path exists) {
+    yq eval '.' $default_config_file
   } else $config
 
-  let config = if (echo $persistent_config_file | path exists) {
-    echo $config | yq eval $". *+ load\("($persistent_config_file)"\)"
+  $config = if ($etc_config_file | path exists) {
+    $config | yq eval $". * load\("($etc_config_file)"\)"
+  } else $config
+
+  for file in (ls $etc_config_dir | where type == file | where name ends-with ".yml") {
+    $config | yq eval $". *+ load\("($file.name)"\)"
+  }
+
+  let config = if ($persistent_config_file | path exists) {
+    $config | yq eval $". *+ load\("($persistent_config_file)"\)"
   } else $config
 
   if $yaml {

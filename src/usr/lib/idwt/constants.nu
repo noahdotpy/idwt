@@ -5,6 +5,7 @@
 export const etc_config_file = "/etc/idwt/config.yml"
 export const persistent_config_file = "/usr/share/idwt/config.yml"
 export const default_config_file = "/usr/share/idwt/default-config.yml"
+export const etc_config_dir = "/etc/idwt/config.d"
 
 export const delayed_rules_file = "/etc/idwt/delayed_rules.yml"
 
