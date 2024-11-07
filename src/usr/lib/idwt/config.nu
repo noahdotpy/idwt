@@ -18,8 +18,10 @@ export def "get_parsed_config" [--yaml] {
     $config | yq eval $". * load\("($etc_config_file)"\)"
   } else $config
 
-  for file in (ls $etc_config_dir | where type == file | where name ends-with ".yml") {
-    $config | yq eval $". *+ load\("($file.name)"\)"
+  if ($etc_config_dir | path exists) {
+    for file in (ls $etc_config_dir | where type == file | where name ends-with ".yml") {
+      $config = $config | yq eval $". *+ load\("($file.name)"\)"
+    }
   }
 
   let config = if ($persistent_config_file | path exists) {
