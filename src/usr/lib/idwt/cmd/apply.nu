@@ -7,8 +7,6 @@ use ../group.nu *
 use ../lib.nu *
 use ../config.nu *
 
-# TODO: Add documentation for commands
-
 let config = get_parsed_config
 
 def "main apply process-killing" [] {
