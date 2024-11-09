@@ -1,5 +1,13 @@
-block-binaries:
-  - /var/home/noah
+
+when:
+  - schedule:
+      monday: 07:00-18:00 # apply rule on mondays between 7:00 (7am) - 18:00 (6pm)
+      tuesday-friday: 00:00-17:00 # apply rule on tuesday, wednesday, thursday between midnight (start of day) and 5pm
+      # if time is not specified as time to apply then the rule will not be applied
+    mode: replace # replace or merge (merge appends lists, but overrides keys)
+    rule:
+      networking:
+        mode: allow
 block-kwin-windows:
   block-pip:
     title:

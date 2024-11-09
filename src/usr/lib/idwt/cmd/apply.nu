@@ -209,42 +209,14 @@ def "main apply block-sites" [] {
     }
 }
 
-def "main apply networking" [] {
+def "main apply block-networking" [] {
     print "## Applying: networking ##"
 
-    let affected_users = $config | get affected-users
-
-    for username in $affected_users {
-        let mode = $config | try { get networking.mode } | default "allow"
-        if $mode == "allow" {
-            print $"INFO: Allowing internet connection for user '($username)'"
-            iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
-            ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
-        } else if $mode == "block" {
+    for username in ($config | get affected-users) {
+        if ($config | try { get block-networking } | default false) {
             print $"INFO: Blocking internet connection for user '($username)'"
-            iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
-            ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
-        } else if $mode == "schedule" {
-            let schedules = $config | get networking.schedules
-
-            let schedule_name = $config | get networking.schedule
-            let schedule = $config | get networking.schedules | get $schedule_name
-
-            let days_allowed = $schedule | get days_allowed | each { |day| $day | str downcase }
-            let allow_start = $schedule | get allow_start
-            let allow_end = $schedule | get allow_end
-
-            let current_day = ^date +%A | str downcase
-            let current_time = ^date +%H:%M
-            if ($current_day in $days_allowed) and ($current_time >= $allow_start) and ($current_time < $allow_end) {
-                print $"INFO: Allowing internet connection for user '($username)'"
-                iptables -D OUTPUT -m owner --uid-owner $username -j REJECT
-                ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT
-            } else {
-                print $"INFO: Blocking internet connection for user '($username)'"
-                iptables -A OUTPUT -m owner --uid-owner $username -j REJECT
-                ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT
-            }
+            try { iptables -A OUTPUT -m owner --uid-owner $username -j REJECT }
+            try { ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT }
         }
     }
 }
@@ -254,6 +226,6 @@ def "main apply" [] {
     try {main apply process-killing}
     try {main apply block-sites}
     try {main apply flatpak-app-networking}
-    try {main apply networking}
+    try {main apply block-networking}
     try {main apply delayed_rules}
 }

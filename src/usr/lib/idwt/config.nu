@@ -7,7 +7,7 @@ use ./constants.nu *
 # *    = merge, no append
 # *+   = merge, and append
 
-export def "get_parsed_config" [--yaml] {
+def "merge_configs" [] {
   mut config = ''
 
   $config = if ($default_config_file | path exists) {
@@ -27,6 +27,18 @@ export def "get_parsed_config" [--yaml] {
   let config = if ($persistent_config_file | path exists) {
     $config | yq eval $". *+ load\("($persistent_config_file)"\)"
   } else $config
+  
+  return $config
+}
+
+# TODO: Implement when rules
+# def "apply_whens" [] {
+
+# }
+
+export def "get_parsed_config" [--yaml] {
+  let config = merge_configs
+  # let config = apply_whens # TODO: Implement when rules
 
   if $yaml {
     return $config

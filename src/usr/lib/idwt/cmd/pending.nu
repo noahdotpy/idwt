@@ -32,7 +32,7 @@ def "how_long_until" [date: int] {
   }
 }
 
-# View pending rules (due to delay).
+# List pending rules.
 def "main pending" [] {
   let pending = try { open $delayed_rules_file } | default []
 
