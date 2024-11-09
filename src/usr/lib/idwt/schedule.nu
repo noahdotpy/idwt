@@ -29,7 +29,6 @@ def "expand_day_range" [day_range: string] {
   return ($days | uniq)
 }
 
-# TODO: Test this
 # day_time:
 #   day: day of the week (wednesday, monday, etc.)
 #   time: time of day in 24 hours (11:30, 18:51, etc.)
