@@ -217,6 +217,9 @@ def "main apply block-networking" [] {
             print $"INFO: Blocking internet connection for user '($username)'"
             try { iptables -A OUTPUT -m owner --uid-owner $username -j REJECT }
             try { ip6tables -A OUTPUT -m owner --uid-owner $username -j REJECT }
+        } else {
+            try { iptables -D OUTPUT -m owner --uid-owner $username -j REJECT }
+            try { ip6tables -D OUTPUT -m owner --uid-owner $username -j REJECT }
         }
     }
 }
