@@ -3,11 +3,12 @@
 # I Don't Want To (IDWT)
 
 use ./constants.nu *
+use ./schedule.nu *
 
 # *    = merge, no append
 # *+   = merge, and append
 
-def "merge_configs" [] {
+def "merge_configs" [] -> string {
   mut config = ''
 
   $config = if ($default_config_file | path exists) {
@@ -31,14 +32,38 @@ def "merge_configs" [] {
   return $config
 }
 
-# TODO: Implement when rules
-# def "apply_whens" [] {
+def "apply_whens" [config: string] -> string {
+  for when_rule in ($config | from yaml | try { get when } | default []) {
+    let day_time = {
+      day: (^date +%A | str downcase),
+      time: (^date +%H:%M:%S)
+    }
+    let should_apply = is_day_time_in_schedule ($when_rule | get schedule) $day_time
 
-# }
+    if not $should_apply {
+      continue
+    }
+    
+    let mode = $when_rule | try { get mode } | default "merge"
+    let temp_file = "/tmp/idwt-apply-whens"
+
+    $when_rule | get rule | to yaml | save -f $temp_file
+
+    let new_config = if ($mode == "merge") {
+      $config | yq eval $". *+ load\("($temp_file)"\)"
+    } else if ($mode == "replace") {
+      $config | yq eval $". * load\("($temp_file)"\)"
+    }
+
+    return $new_config
+  }
+
+  return $config
+}
 
 export def "get_parsed_config" [--yaml] {
   let config = merge_configs
-  # let config = apply_whens # TODO: Implement when rules
+  let config = try { apply_whens $config } catch { $config }
 
   if $yaml {
     return $config
