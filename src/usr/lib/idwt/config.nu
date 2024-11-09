@@ -45,5 +45,4 @@ export def "get_parsed_config" [--yaml] {
   } else {
     return ($config | from yaml)
   }
-
 }

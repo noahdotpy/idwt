@@ -1,6 +1,7 @@
 alias be := build-enter
 alias b := build
 alias e := enter
+alias t := test
 
 build-enter TARGET="fedora-dev":
     #!/bin/sh
@@ -12,3 +13,6 @@ build TARGET="fedora-dev":
 
 enter TARGET="fedora-dev":
     podman run -it localhost/idwt-{{ TARGET }}
+
+test:
+    nu ./tests/mod.nu

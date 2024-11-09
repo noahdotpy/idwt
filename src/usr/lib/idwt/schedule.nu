@@ -2,6 +2,8 @@
 
 # I Don't Want To (IDWT)
 
+use std *
+
 def "expand_day_range" [day_range: string] {
   let days_of_week = [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
 
@@ -28,33 +30,26 @@ def "expand_day_range" [day_range: string] {
 }
 
 # TODO: Test this
-def is_day_time_in_schedule [
+# day_time:
+#   day: day of the week (wednesday, monday, etc.)
+#   time: time of day in 24 hours (11:30, 18:51, etc.)
+export def is_day_time_in_schedule [
   schedule: record,
-  day_time: record<day: string, hour: int, minute: int>
+  day_time: record<day: string, time: string>
 ] {
-  for day_range in $schedule {
+  for day_range in ($schedule | columns) {
     let days = expand_day_range $day_range
     if not ($day_time.day in $days) {
       continue
     }
 
-    let start_str = $day_range | get start
-    let start = {
-      hour: ($start_str | split row '-' | get 0),
-      minute: ($start_str | split row '-' | get 1)
-    }
+    let times = $schedule | get $day_range | split row '-'
 
-    let end_str = $day_range | get end
-    let end = {
-      hour: ($end_str | split row '-' | get 0),
-      minute: ($end_str | split row '-' | get 1)
-    }
+    let time = ^date +%s --date=($day_time.time)
+    let start = ^date +%s --date=($times.0)
+    let end = ^date +%s --date=($times.1)
 
-    if $day_time.hour < $start.hour or $day_time.hour > $end.hour {
-      continue
-    }
-
-    if $day_time.minute < $start.min or $day_time.minute > $end.minute {
+    if $time < $start or $time >= $end {
       continue
     }
 
