@@ -25,7 +25,7 @@ def "main apply process-killing" [] {
   let allow = $config | try { get process-killing.allow } | default []
   let allow_shas = $config | try { get process-killing.allow-shas } | default []
 
-  let ps_data = ps | default []
+  let ps_data = ps --long | default []
   
   mut kill_list = []
   for regex in $block {
@@ -47,7 +47,12 @@ def "main apply process-killing" [] {
   print $kill_list
 
   for process in ($ps_data | where name in $kill_list) {
+    if not (id -nu ($ps_data | get user_id) in ($config | get affected-users)) {
+        continue
+    }
+
     try { kill --force $process.pid }
+
     for user in ($config | get affected-users) {
       sudo --user $user notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical
     }
