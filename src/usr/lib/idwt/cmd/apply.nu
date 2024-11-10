@@ -9,6 +9,7 @@ use ../config.nu *
 
 let config = get_parsed_config
 
+# TODO: Use `jc ps -fu $user` to get process list that is submitted from user
 def "main apply process-killing" [] {
   print "## Applying: process killing ##"
 
