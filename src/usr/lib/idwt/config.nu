@@ -32,6 +32,7 @@ def "merge_configs" [] -> string {
   return $config
 }
 
+# TODO: Fix this, it's probably not working
 def "apply_whens" [config: string] -> string {
   for when_rule in ($config | from yaml | try { get when } | default []) {
     let day_time = {
