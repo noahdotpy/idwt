@@ -4,6 +4,6 @@
 
 use ../config.nu *
 
-def "main get_parsed_config" [] {
-  return (get_parsed_config --yaml)
+def "main get-config" [] {
+  return (get_config --yaml)
 }
