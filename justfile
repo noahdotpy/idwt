@@ -1,3 +1,5 @@
+export project_root := `git rev-parse --show-toplevel`
+
 alias be := build-enter
 alias b := build
 alias e := enter
@@ -15,4 +17,4 @@ enter TARGET="fedora-dev":
     podman run -it localhost/idwt-{{ TARGET }}
 
 test:
-    nu ./tests/mod.nu
+    nu {{ project_root }}/tests/mod.nu
