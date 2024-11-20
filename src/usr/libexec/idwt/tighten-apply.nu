@@ -23,7 +23,17 @@ if not (regex_matches_with_any $approved_commands $command_str) {
 
     print $"INFO: ($command_str) is not in approved tightener commands - using delay feature at ($tightener_config | get delay) seconds instead"
     let current_time = ^date +%s | into int
-    let delayed_time = $current_time + ($tightener_config | get delay)
+
+    mut delay = $tightener_config | get delay
+    
+    for delay_rule in ($tightener_config | get delays) {
+      let key = $delay_rule | columns | get 0
+      if (does_regex_match $command ($key)) {
+        $delay = $delay_rule | get $key
+      }
+    }
+
+    let delayed_time = $current_time + $delay
     let delayed_rules = try {cat $delayed_rules_file | from yaml} | default []
     let new_file_contents = $delayed_rules | append {command: $command, time_to_apply: $delayed_time} | to yaml
     $new_file_contents | save -f $delayed_rules_file

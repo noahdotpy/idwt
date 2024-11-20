@@ -2,7 +2,7 @@
 
 ## block-networking
 
-This module uses iptables to add a REJECT rule to all users in the `affected-users` key.
+This module uses iptables to add a REJECT rule to all users listed in the `affected-users` key.
 
 The default value for this key is `false`.
 

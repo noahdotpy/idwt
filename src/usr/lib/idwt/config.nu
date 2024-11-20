@@ -45,12 +45,12 @@ def "apply_whens" [config: string] -> string {
       continue
     }
     
-    let mode = $when_rule | try { get mode } | default "merge"
+    let mode = $when_rule | try { get technique } | default "append"
     let temp_file = "/tmp/idwt-apply-whens"
 
     $when_rule | get rule | to yaml | save -f $temp_file
 
-    let new_config = if ($mode == "merge") {
+    let new_config = if ($mode == "append") {
       $config | yq eval $". *+ load\("($temp_file)"\)"
     } else if ($mode == "replace") {
       $config | yq eval $". * load\("($temp_file)"\)"

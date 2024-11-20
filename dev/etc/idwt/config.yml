@@ -6,3 +6,8 @@ when:
     mode: replace # replace or merge (merge appends lists, but overrides keys like replace)
     rule:
       block-networking: true
+
+tightener:
+  delay: 100
+  delays:
+    - 'idwt group add noah wheel': 10 # set delay to 10 seconds for adding noah to wheel group
