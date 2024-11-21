@@ -1,5 +1,11 @@
 # I Don't Want To (IDWT)
 
 ## Dependencies
-The following package ids are the fedora package ids
+
+All modules:
+
 - jc
+
+close gnome windows:
+
+- [ickyicky/window-calls](https://github.com/ickyicky/window-calls)

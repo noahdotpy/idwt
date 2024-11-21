@@ -2,14 +2,14 @@
 
 # I Don't Want To (IDWT)
 
-use ../constants.nu *
-use ../group.nu *
-use ../lib.nu *
-use ../config.nu *
+use ../lib/constants.nu *
+use ../lib/group.nu *
+use ../lib/regex.nu *
+use ../lib/config.nu *
 
 let config = get-config
 
-def "main apply process-killing" [] {
+def "main apply-system process-killing" [] {
   print "## Applying: process killing ##"
 
   # process-killing:
@@ -58,7 +58,7 @@ def "main apply process-killing" [] {
   }
 }
 
-def "main apply delayed-rules" [] {
+def "main apply-system delayed-rules" [] {
   print "## Applying: delayed rules ##"
 
   let delayed_rules = cat $delayed_rules_file | from yaml
@@ -75,7 +75,7 @@ def "main apply delayed-rules" [] {
   }
 }
 
-def "main apply block-kwin-windows" [] {
+def "main apply-system block-kwin-windows" [] {
     print "## Applying: block kwin windows ##"
 
     let file = "/etc/xdg/kwinrulesrc"
@@ -129,7 +129,7 @@ def "main apply block-kwin-windows" [] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply flatpak-app-networking" [] {
+def "main apply-system flatpak-app-networking" [] {
     print "## Applying: flatpak app networking ##"
 
     let affected_users = $config | try { get affected-users } | default []
@@ -178,7 +178,7 @@ def "main apply flatpak-app-networking" [] {
     }
 }
 
-def "main apply block-sites" [] {
+def "main apply-system block-sites" [] {
     print "## Applying: block sites ##"
 
     let sites = $config | try { get block-sites } | default []
@@ -213,7 +213,7 @@ def "main apply block-sites" [] {
     }
 }
 
-def "main apply block-networking" [] {
+def "main apply-system block-networking" [] {
     print "## Applying: networking ##"
 
     for username in ($config | get affected-users) {
@@ -229,21 +229,11 @@ def "main apply block-networking" [] {
 }
 
 # TODO: Add a verbose log level that will print stuff like making flatpak overrides
-def "main apply-all" [] {
-    try { main apply block-kwin-windows     } catch { |err| $err.msg }
-    try { main apply process-killing        } catch { |err| $err.msg }
-    try { main apply block-sites            } catch { |err| $err.msg }
-    try { main apply flatpak-app-networking } catch { |err| $err.msg }
-    try { main apply block-networking       } catch { |err| $err.msg }
-    try { main apply delayed-rules          } catch { |err| $err.msg }
-}
-
-# TODO: Deprecate `apply` in favour of `apply-all`
-def "main apply" [] {
-    try { main apply block-kwin-windows     } catch { |err| $err.msg }
-    try { main apply process-killing        } catch { |err| $err.msg }
-    try { main apply block-sites            } catch { |err| $err.msg }
-    try { main apply flatpak-app-networking } catch { |err| $err.msg }
-    try { main apply block-networking       } catch { |err| $err.msg }
-    try { main apply delayed-rules          } catch { |err| $err.msg }
+def "main apply-system" [] {
+    try { main apply-system block-kwin-windows     } catch { |err| $err.msg }
+    try { main apply-system block-networking       } catch { |err| $err.msg }
+    try { main apply-system block-sites            } catch { |err| $err.msg }
+    try { main apply-system delayed-rules          } catch { |err| $err.msg }
+    try { main apply-system flatpak-app-networking } catch { |err| $err.msg }
+    try { main apply-system process-killing        } catch { |err| $err.msg }
 }

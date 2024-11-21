@@ -2,7 +2,7 @@
 
 # I Don't Want To (IDWT)
 
-use ../constants.nu *
+use ../lib/constants.nu *
 
 
 # Tighten executes `idwt edit {command}` under the hood.

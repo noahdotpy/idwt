@@ -2,8 +2,8 @@
 
 # I Don't Want To (IDWT)
 
-use ../constants.nu *
-use ../group.nu *
+use ../lib/constants.nu
+use ../lib/group.nu *
 
 # TODO: Add documentation for commands
 

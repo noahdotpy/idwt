@@ -2,7 +2,8 @@
 
 # I Don't Want To (IDWT)
 
-source ../lib/idwt/cmd/apply.nu
+source ../lib/idwt/cmd/apply-system.nu
+source ../lib/idwt/cmd/apply-user.nu
 source ../lib/idwt/cmd/edit.nu
 source ../lib/idwt/cmd/get-config.nu
 source ../lib/idwt/cmd/pending.nu
