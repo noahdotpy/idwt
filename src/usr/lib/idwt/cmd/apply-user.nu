@@ -47,7 +47,8 @@ def "main apply-user close-gnome-windows" [] {
                     gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/Windows --method org.gnome.Shell.Extensions.Windows.Close $window_id
                 } catch {|err|
                     print $err.msg
-                } 
+                }
+                notify-send --app-name "IDWT" "Closed Gnome Window" $"Closed window with class: ($window_class), title: ($window_title)" --urgency=critical
             }
         }
     }
