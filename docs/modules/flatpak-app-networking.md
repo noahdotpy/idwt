@@ -6,7 +6,7 @@ This module works by creating a file in every user's (as defined in `users-affec
 
 Every flatpak id in `flatpak-app-networking.block` is blocked with highest priority over any allow, always being blocked.
 
-Below is an example of blocking Gnome Boxes virtualisation software.
+Below is an example of blocking GNOME Boxes virtualisation software.
 
 ```yml
 flatpak-app-networking:

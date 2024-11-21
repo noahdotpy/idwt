@@ -32,11 +32,11 @@ def "main apply-user close-gnome-windows" [] {
 
             mut matched = []
 
-            if (is_property_defined $rule class) and ($rule.class == $window_class) {
+            if (is_property_defined $rule class) and (does_regex_match $window_class $rule.class) {
                 $matched = [...$matched "class"]
             }
 
-            if (is_property_defined $rule title) and ($rule.title == $window_title) {
+            if (is_property_defined $rule title) and (does_regex_match $window_title $rule.title) {
                 $matched = [...$matched "title"]
             }
 
@@ -48,7 +48,7 @@ def "main apply-user close-gnome-windows" [] {
                 } catch {|err|
                     print $err.msg
                 }
-                notify-send --app-name "IDWT" "Closed Gnome Window" $"Closed window with class: ($window_class), title: ($window_title)" --urgency=critical
+                notify-send --app-name "IDWT" "Closed GNOME Window" $"Closed window with class: ($window_class), title: ($window_title)" --urgency=critical
             }
         }
     }
