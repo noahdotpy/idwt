@@ -8,8 +8,7 @@ when:
       block-networking: true
 
 close-gnome-windows:
-  - title: "title"
-    class: "class"
+  - title: "^Picture in picture$"
 
 tightener:
   delay: 100

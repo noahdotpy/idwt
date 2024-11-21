@@ -33,7 +33,7 @@ def "how_long_until" [date: int] {
 }
 
 # List pending rules.
-def "main pending" [] {
+def "main pending list" [] {
   let pending = try { open $delayed_rules_file } | default []
 
   mut idx = 1

@@ -2,9 +2,9 @@
 
 # I Don't Want To (IDWT)
 
-use ../../lib/idwt/config.nu *
-use ../../lib/idwt/constants.nu *
-use ../../lib/idwt/lib.nu *
+use ../../lib/idwt/lib/config.nu *
+use ../../lib/idwt/lib/constants.nu *
+use ../../lib/idwt/lib/regex.nu *
 
 let temp_file = open $tighten_temp_file | from nuon
 let command = $temp_file | get command
