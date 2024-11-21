@@ -62,7 +62,7 @@ def "apply_whens" [config: string] -> string {
   return $config
 }
 
-export def "get_config" [--yaml] {
+export def "get-config" [--yaml] {
   let config = merge_configs
   let config = try { apply_whens $config } catch { $config }
 

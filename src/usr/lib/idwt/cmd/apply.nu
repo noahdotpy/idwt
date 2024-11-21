@@ -7,7 +7,7 @@ use ../group.nu *
 use ../lib.nu *
 use ../config.nu *
 
-let config = get_config
+let config = get-config
 
 def "main apply process-killing" [] {
   print "## Applying: process killing ##"

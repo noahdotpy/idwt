@@ -5,5 +5,5 @@
 use ../config.nu *
 
 def "main get-config" [] {
-  return (get_config --yaml)
+  return (get-config --yaml)
 }
