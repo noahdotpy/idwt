@@ -61,16 +61,15 @@ def "main apply-system process-killing" [] {
 def "main apply-system delayed-rules" [] {
   print "## Applying: delayed rules ##"
 
-  let delayed_rules = cat $delayed_rules_file | from yaml
+  let pending = cat $pending_file | from yaml
   let current_time = ^/usr/bin/date +%s | into int
 
-  for rule in $delayed_rules {
+  for rule in $pending {
     if $current_time >= ($rule.time_to_apply | into int) {
         ^$idwt_bin edit ...$rule.command
 
-        # remove this from the list
-        let delayed_rules = $delayed_rules | filter {|el| $el != $rule}
-        $delayed_rules | to yaml | save -f $delayed_rules_file
+        let pending = $pending | filter {|el| $el != $rule}
+        $pending | to yaml | save -f $pending_file
       }
   }
 }

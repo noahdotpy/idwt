@@ -34,7 +34,7 @@ def "how_long_until" [date: int] {
 
 # List pending rules.
 def "main pending list" [] {
-  let pending = try { open $delayed_rules_file } | default []
+  let pending = try { open $pending_file } | default []
 
   mut idx = 1
   for rule in $pending {
@@ -46,5 +46,16 @@ def "main pending list" [] {
     print $'($idx): command: ($command)'
     print $'($padding)  applying in: ($real_time)'
     $idx += 1
+  }
+}
+
+def "main pending apply" [] {
+  let pending = try { open $pending_file } | default []
+  
+  for rule in $pending {
+    ^$idwt_bin edit ...$rule.command
+
+    let pending = $pending | filter {|el| $el != $rule}
+    $pending | to yaml | save -f $pending_file
   }
 }

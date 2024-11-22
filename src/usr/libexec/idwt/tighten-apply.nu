@@ -10,7 +10,7 @@ let temp_file = open $tighten_temp_file | from nuon
 let command = $temp_file | get command
 let command_str = $command | str join ' '
 
-let config = get_parsed_config
+let config = get-config
 let tightener_config = $config | get tightener
 let approved_commands = $tightener_config | get approved-commands
 
@@ -26,7 +26,7 @@ if not (regex_matches_with_any $approved_commands $command_str) {
 
     mut delay = $tightener_config | get delay
     
-    for delay_rule in ($tightener_config | get delays) {
+    for delay_rule in ($tightener_config | try { get delays } | default []) {
       let key = $delay_rule | columns | get 0
       if (does_regex_match $command ($key)) {
         $delay = $delay_rule | get $key
@@ -34,9 +34,9 @@ if not (regex_matches_with_any $approved_commands $command_str) {
     }
 
     let delayed_time = $current_time + $delay
-    let delayed_rules = try {cat $delayed_rules_file | from yaml} | default []
-    let new_file_contents = $delayed_rules | append {command: $command, time_to_apply: $delayed_time} | to yaml
-    $new_file_contents | save -f $delayed_rules_file
+    let pending = try {cat $pending_file | from yaml} | default []
+    let new_file_contents = $pending | append {command: $command, time_to_apply: $delayed_time} | to yaml
+    $new_file_contents | save -f $pending_file
 } else {
   ^$idwt_bin edit ...$command
 }

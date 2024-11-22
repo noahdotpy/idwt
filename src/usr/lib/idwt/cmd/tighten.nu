@@ -22,5 +22,5 @@ def "main tighten" [
     ...command: string # The subcommand to pass to `idwt edit`
 ] {
     {command: $command} | to nuon | save -f $tighten_temp_file
-    ^sudo /usr/libexec/idwt/tighten-apply.nu
+    ^sudo $tighten_apply_bin
 }
