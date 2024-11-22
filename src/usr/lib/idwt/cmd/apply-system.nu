@@ -74,56 +74,58 @@ def "main apply-system delayed-rules" [] {
   }
 }
 
-def "main apply-system block-kwin-windows" [] {
-    print "## Applying: block kwin windows ##"
+def "main apply-system kill-plasma-windows" [] {
+    print "## Applying: kill plasma windows ##"
 
     let file = "/etc/xdg/kwinrulesrc"
 
     mut lines = ["# IDWT MANAGED: FILE WILL BE CHANGED"]
 
-    let rules = $config | try { get block-kwin-windows } | default []
-    mut rule_ids = $config | try { get block-kwin-windows} | default {} | columns
+    let rules = $config | try { get kill-plasma-windows } | default []
 
-    for rule_id in $rule_ids {
+    for rule in ($rules | enumerate) {
+      let index = $rule.index
+      let rule = $rule.item
 
-      let rule = $rules | get $rule_id
+      let description = if (is_property_defined $rule description) {
+        $"IDWT Managed: ($index)"
+      } else {
+        $"IDWT Managed: ($rule.description)"
+      }
 
-      $lines = [...$lines $"[($rule_id)][$i]"]
-      $lines = [...$lines $"Description=IDWT Window Blocked: id=($rule_id)"]
+      $lines = [...$lines $"[($index)][$i]"]
 
+      $lines = [...$lines $"Description=($description)"]
+
+      # class is not based on the whole window class
       if (is_property_defined $rule class) {
-          $lines = [...$lines $"wmclass=($rule | get class.value)"]
-          $lines = [...$lines $"wmclassmatch=(kwin_match_type_to_number ($rule | get class.match_type))"]
-          if (is_property_defined ($rule | get class) whole_window_class) and ($rule | get class.whole_window_class) {
-              $lines = [...$lines $"wmclasscomplete=true"]
-          }
+          $lines = [...$lines $"wmclass=($rule | get class)"]
+          $lines = [...$lines "wmclassmatch=regex"]
+          $lines = [...$lines "wmclasscomplete=false"]
       }
+
       if (is_property_defined $rule title) {
-          $lines = [...$lines $"title=($rule | get title.value)"]
-          $lines = [...$lines $"titlematch=(kwin_match_type_to_number ($rule | get title.match_type))"]
-      }
-      if (is_property_defined $rule role) {
-          $lines = [...$lines $"windowrole=($rule | get role.value)"]
-          $lines = [...$lines $"windowrolematch=(kwin_match_type_to_number ($rule | get role.match_type))"]
+          $lines = [...$lines $"title=($rule | get title)"]
+          $lines = [...$lines "titlematch=regex)"]
       }
 
-      # Always force minimize
-      $lines = [...$lines $"minimize=true"]
-      $lines = [...$lines $"minimizerule=2"]
+      # Always force window to be minimized
+      $lines = [...$lines "minimize=true"]
+      $lines = [...$lines "minimizerule=2"]
 
-      # Always force size to be 1x1 pixels
-      $lines = [...$lines $"size=1,1"]
-      $lines = [...$lines $"sizerule=2"]
+      # Always force window size to be 1x1 pixels
+      $lines = [...$lines "size=1,1"]
+      $lines = [...$lines "sizerule=2"]
 
       # Do not obey geometry restrictions
-      $lines = [...$lines $"strictgeometryrule=2"]
+      $lines = [...$lines "strictgeometryrule=2"]
 
       $lines = [...$lines ""]
     }
 
     $lines = [...$lines $"[General][$i]"]
-    $lines = [...$lines $"count=($rule_ids | length)"]
-    $lines = [...$lines $"rules=($rule_ids | str join ',')"]
+    $lines = [...$lines $"count=($rules | length)"]
+    $lines = [...$lines $"rules=($rules | enumerate | get index | str join ',')"]
 
     $lines | str join "\n" | save -f $file 
 }
@@ -229,7 +231,7 @@ def "main apply-system block-networking" [] {
 
 # TODO: Add a verbose log level that will print stuff like making flatpak overrides
 def "main apply-system" [] {
-    try { main apply-system block-kwin-windows     } catch { |err| $err.msg }
+    try { main apply-system kill-plasma-windows     } catch { |err| $err.msg }
     try { main apply-system block-networking       } catch { |err| $err.msg }
     try { main apply-system block-sites            } catch { |err| $err.msg }
     try { main apply-system delayed-rules          } catch { |err| $err.msg }

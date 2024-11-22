@@ -6,6 +6,6 @@ All modules:
 
 - jc
 
-close-gnome-windows:
+kill-gnome-windows:
 
 - [ickyicky/window-calls](https://github.com/ickyicky/window-calls)

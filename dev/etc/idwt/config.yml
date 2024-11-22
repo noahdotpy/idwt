@@ -7,8 +7,13 @@ when:
     rule:
       block-networking: true
 
-close-gnome-windows:
+kill-gnome-windows:
   - title: "^Picture in picture$"
+    class: "^SDSAD$"
+kill-plasma-windows:
+- description: "Block Picture in Picture"
+  title: "^Picture in picture$"
+  class: "^chromium$"
 
 tightener:
   delay: 100
