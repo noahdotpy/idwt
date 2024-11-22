@@ -1,4 +1,4 @@
-# Controlling user access to internet
+# Blocking a user's access to internet
 
 ## block-networking
 
