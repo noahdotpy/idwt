@@ -9,10 +9,10 @@ use ../lib/config.nu *
 
 let config = get-config
 
-def "main apply-system process-killing" [] {
-  print "## Applying: process killing ##"
+def "main apply-system kill-processes" [] {
+  print "## Applying: kill processes ##"
 
-  # process-killing:
+  # kill-processes:
   #   allow: # allow has priority over block
   #     - /home/noah/.local/share/activitywatch/aw-qt
   #   allow-shas:
@@ -20,9 +20,9 @@ def "main apply-system process-killing" [] {
   #   block:
   #     - /home/noah
  
-  let block = $config | try { get process-killing.block } | default []
-  let allow = $config | try { get process-killing.allow } | default []
-  let allow_shas = $config | try { get process-killing.allow-shas } | default []
+  let block = $config | try { get kill-processes.block } | default []
+  let allow = $config | try { get kill-processes.allow } | default []
+  let allow_shas = $config | try { get kill-processes.allow-shas } | default []
 
   let ps_data = ps --long | default []
   
@@ -130,22 +130,22 @@ def "main apply-system kill-plasma-windows" [] {
     $lines | str join "\n" | save -f $file 
 }
 
-def "main apply-system flatpak-app-networking" [] {
-    print "## Applying: flatpak app networking ##"
+def "main apply-system toggle-flatpak-networking" [] {
+    print "## Applying: toggle flatpak networking ##"
 
     let affected_users = $config | try { get affected-users } | default []
 
-    
-    
     for user in $affected_users {
-        let flatpaks_list = if ($config | try { get flatpak-app-networking.block-otherwise } | default false) {
+        let flatpaks_list = if ($config | try { get toggle-flatpak-networking.block-otherwise } | default false) {
+          
           # the following code takes out any app ids that are in allow
           # leaving the remaining to be blocked
           let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
-          $apps | filter {|x| not ($x in ($config | get flatpak-app-networking.allow))}
+          $apps | filter {|x| not ($x in ($config | get toggle-flatpak-networking.allow))}
+        
         } else { [] }
 
-        let flatpaks_list = $flatpaks_list | append ($config | try { get flatpak-app-networking.block } | default [])
+        let flatpaks_list = $flatpaks_list | append ($config | try { get toggle-flatpak-networking.block } | default [])
 
         let overrides_dir = $"/home/($user)/.local/share/flatpak/overrides"
         mkdir $overrides_dir
@@ -235,6 +235,6 @@ def "main apply-system" [] {
     try { main apply-system block-networking       } catch { |err| $err.msg }
     try { main apply-system block-sites            } catch { |err| $err.msg }
     try { main apply-system delayed-rules          } catch { |err| $err.msg }
-    try { main apply-system flatpak-app-networking } catch { |err| $err.msg }
-    try { main apply-system process-killing        } catch { |err| $err.msg }
+    try { main apply-system toggle-flatpak-networking } catch { |err| $err.msg }
+    try { main apply-system kill-processes        } catch { |err| $err.msg }
 }
