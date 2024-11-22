@@ -231,10 +231,10 @@ def "main apply-system block-networking" [] {
 
 # TODO: Add a verbose log level that will print stuff like making flatpak overrides
 def "main apply-system" [] {
-    try { main apply-system kill-plasma-windows     } catch { |err| $err.msg }
-    try { main apply-system block-networking       } catch { |err| $err.msg }
-    try { main apply-system block-sites            } catch { |err| $err.msg }
-    try { main apply-system delayed-rules          } catch { |err| $err.msg }
+    try { main apply-system kill-plasma-windows       } catch { |err| $err.msg }
+    try { main apply-system block-networking          } catch { |err| $err.msg }
+    try { main apply-system block-sites               } catch { |err| $err.msg }
+    try { main apply-system delayed-rules             } catch { |err| $err.msg }
     try { main apply-system toggle-flatpak-networking } catch { |err| $err.msg }
-    try { main apply-system kill-processes        } catch { |err| $err.msg }
+    try { main apply-system kill-processes            } catch { |err| $err.msg }
 }
