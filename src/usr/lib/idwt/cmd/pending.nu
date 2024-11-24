@@ -36,6 +36,10 @@ def "how_long_until" [date: int] {
 def "main pending list" [] {
   let pending = try { open $pending_file } | default []
 
+  if ($pending | is-empty) {
+    print $'No rules waiting to be applied.'
+  }
+
   mut idx = 1
   for rule in $pending {
     let real_time = how_long_until $rule.time_to_apply
@@ -51,7 +55,7 @@ def "main pending list" [] {
 
 def "main pending apply" [] {
   let pending = try { open $pending_file } | default []
-  
+
   for rule in $pending {
     ^$idwt_bin edit ...$rule.command
 

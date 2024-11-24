@@ -25,7 +25,7 @@ if not (regex_matches_with_any $approved_commands $command_str) {
     let current_time = ^date +%s | into int
 
     mut delay = $tightener_config | get delay
-    
+
     for delay_rule in ($tightener_config | try { get delays } | default []) {
       let key = $delay_rule | columns | get 0
       if (does_regex_match $command ($key)) {
