@@ -1,6 +1,17 @@
 [package]
-name = "idwt-rs"
+name = "idwt"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.0", features = ["derive"] }
+anyhow = "1.0"
+indicatif = "0.17.9"
+log = "0.4.22"
+env_logger = "0.11.5"
+clap-verbosity-flag = "3.0.0"
+
+[dev-dependencies]
+assert_cmd = "2.0.16"
+predicates = "3.1.2"
+assert_fs = "1.1.1"
