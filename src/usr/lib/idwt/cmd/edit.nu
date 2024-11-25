@@ -7,10 +7,12 @@ use ../lib/group.nu *
 
 # TODO: Add documentation for commands
 
+# `edit make_file_immutable` is DEPRECATED in favour of a future `.set-files-immutable` in config
+
 def "main edit make_file_immutable" [
   path: string
 ] {
-  /usr/bin/chattr +i $path
+  ^chattr +i $path
 }
 
 # `edit group *` is DEPRECATED in favour of `.admin-users` in config

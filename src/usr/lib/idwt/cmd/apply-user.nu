@@ -12,13 +12,14 @@ let config = get-config
 def "main apply-user kill-gnome-windows" [] {
     print "## Applying: kill gnome windows ##"
 
-    let window_ids = gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/Windows --method org.gnome.Shell.Extensions.Windows.List | cut -c 3- | rev | cut -c4- | rev | from json | get id
+    let window_ids = ^/usr/bin/gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/Windows --method org.gnome.Shell.Extensions.Windows.List | cut -c 3- | rev | cut -c4- | rev | from json | get id
     
     for window_id in $window_ids {
         let window = try {
-            gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/Windows --method org.gnome.Shell.Extensions.Windows.Details $window_id | cut -c 3- | rev | cut -c4- | rev | from json
+            ^/usr/bin/gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/Windows --method org.gnome.Shell.Extensions.Windows.Details $window_id | cut -c 3- | rev | cut -c4- | rev | from json
         } catch {|err|
-            $err.msg
+            print $err.msg
+            continue
         } 
         
         let window_class = $window | get wm_class_instance | default '' | describe

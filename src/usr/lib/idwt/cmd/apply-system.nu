@@ -50,8 +50,8 @@ def "main apply-system kill-processes" [] {
   }
 
   for location in ($allow_shas | columns) {
-    let real_sha = sha256sum $location | split row '  ' | trim
-    let expected_sha = sha256sum ($allow_shas | get $location) | trim
+    let real_sha = ^sha256sum $location | split row '  ' | trim
+    let expected_sha = ^sha256sum ($allow_shas | get $location) | trim
     if $real_sha == $expected_sha {
       $kill_list = $kill_list | default [] | filter {|e| $e != $location}
     }
@@ -67,7 +67,7 @@ def "main apply-system kill-processes" [] {
     try { kill --force $process.pid }
 
     for user in ($config | get affected-users) {
-      sudo --user $user notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical
+      ^sudo --user $user ^notify-send --app-name "IDWT" "Killed Process" $"Process with name `($process.name)` was killed forcefully." --urgency=critical
     }
   }
 }
@@ -75,8 +75,8 @@ def "main apply-system kill-processes" [] {
 def "main apply-system delayed-rules" [] {
   print "## Applying: delayed rules ##"
 
-  let pending = cat $pending_file | from yaml
-  let current_time = ^/usr/bin/date +%s | into int
+  let pending = ^cat $pending_file | from yaml
+  let current_time = ^date +%s | into int
 
   for rule in $pending {
     if $current_time >= ($rule.time_to_apply | into int) {
@@ -154,7 +154,7 @@ def "main apply-system toggle-flatpak-networking" [] {
           
           # the following code takes out any app ids that are in allow
           # leaving the remaining to be blocked
-          let apps = flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
+          let apps = ^flatpak list --columns app --system --app | tail -n +1 | split row "\n" | append (ls $"/home/($user)/.local/share/flatpak/exports/bin/" | get name | each {|e| $e | path basename})
           $apps | filter {|x| not ($x in ($config | get toggle-flatpak-networking.allow))}
         
         } else { [] }

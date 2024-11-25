@@ -12,21 +12,21 @@ def "merge_configs" [] -> string {
   mut config = ''
 
   $config = if ($default_config_file | path exists) {
-    /usr/bin/yq eval '.' $default_config_file
+    ^yq eval '.' $default_config_file
   } else $config
 
   $config = if ($etc_config_file | path exists) {
-    $config | /usr/bin/yq eval $". * load\("($etc_config_file)"\)"
+    $config | ^yq eval $". * load\("($etc_config_file)"\)"
   } else $config
 
   if ($etc_config_dir | path exists) {
     for file in (ls $etc_config_dir | where type == file | where name ends-with ".yml") {
-      $config = $config | /usr/bin/yq eval $". *+ load\("($file.name)"\)"
+      $config = $config | ^yq eval $". *+ load\("($file.name)"\)"
     }
   }
 
   let config = if ($persistent_config_file | path exists) {
-    $config | /usr/bin/yq eval $". *+ load\("($persistent_config_file)"\)"
+    $config | ^yq eval $". *+ load\("($persistent_config_file)"\)"
   } else $config
   
   return $config
@@ -36,8 +36,8 @@ def "merge_configs" [] -> string {
 def "apply_whens" [config: string] -> string {
   for when_rule in ($config | from yaml | try { get when } | default []) {
     let day_time = {
-      day: (^/usr/bin/date +%A | str downcase),
-      time: (^/usr/bin/date +%H:%M:%S)
+      day: (^date +%A | str downcase),
+      time: (^date +%H:%M:%S)
     }
     let should_apply = is_day_time_in_schedule ($when_rule | get schedule) $day_time
 
@@ -51,12 +51,12 @@ def "apply_whens" [config: string] -> string {
     $when_rule | get rule | to yaml | save -f $temp_file
 
     let new_config = if ($mode == "append") {
-      $config | /usr/bin/yq eval $". *+ load\("($temp_file)"\)"
+      $config | ^yq eval $". *+ load\("($temp_file)"\)"
     } else if ($mode == "replace") {
-      $config | /usr/bin/yq eval $". * load\("($temp_file)"\)"
+      $config | ^yq eval $". * load\("($temp_file)"\)"
     }
 
-    /usr/bin/rm -rf $temp_file
+    ^rm -rf $temp_file
 
     return $new_config
   }
