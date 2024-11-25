@@ -13,7 +13,7 @@ export def group_remove [
     user: string,
     group: string,
 ] {
-    if (groups $user) =~ $group {
+    if (/usr/bin/groups $user) =~ $group {
         /usr/bin/gpasswd -d $user $group
     }
 }

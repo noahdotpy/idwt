@@ -13,6 +13,8 @@ def "main edit make_file_immutable" [
   /usr/bin/chattr +i $path
 }
 
+# `edit group *` is DEPRECATED in favour of `.admin-users` in config
+
 def "main edit group add" [
     user: string,
     group: string,

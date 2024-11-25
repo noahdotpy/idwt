@@ -9,6 +9,20 @@ use ../lib/config.nu *
 
 let config = get-config
 
+def "main apply-system revoke-admin" [] {
+  print "## Applying: revoke admin ##"
+
+  let to_revoke = $config | try { get affected-users } | default [] | filter {
+    |user|
+    $user in ($config | try { get revoke-admin } | default [])
+  }
+
+  for user in $to_revoke {
+    group_remove $user wheel
+    group_remove $user sudo
+  }
+}
+
 def "main apply-system kill-processes" [] {
   print "## Applying: kill processes ##"
 
