@@ -44,8 +44,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=tag
             type=raw,value=git,enable={{is_default_branch}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{version}}
             type=sha
 
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
@@ -55,7 +56,6 @@ jobs:
         id: push
         uses: docker/build-push-action@v5
         with:
-          target: prod
           file: Containerfile
           context: .
           push: true
