@@ -4,9 +4,11 @@
 
 ### How to use in containers
 
-Outputs available:
+Below is a table describing where the outputs from the `idwt-rs` container should go.
 
-- /out/bin/idwt
+| Output path                      | Recommended Destination          |
+|----------------------------------|----------------------------------|
+| /out/bin/idwt                    | /usr/bin/idwt                    |
 
 Tags available:
 
@@ -21,12 +23,3 @@ Below is an example of copying /out/bin/idwt to /usr/bin/idwt with idwt-rs versi
 COPY --from=ghcr.io/noahdotpy/idwt-rs:1.2.3 /out/bin/idwt /usr/bin/idwt
 ```
 
-## Dependencies
-
-All modules:
-
-- jc
-
-kill-gnome-windows:
-
-- [ickyicky/window-calls](https://github.com/ickyicky/window-calls) (make sure to force usage of this extension so the user doesn't disable it)
