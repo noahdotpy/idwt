@@ -11,7 +11,7 @@ Outputs available:
 Tags available:
 
 - git (for the latest git commit)
-- {COMMIT_SHA}
+- {COMMIT_SHA} (eg: 74224c0)
 - {MAJOR} (eg: 1)
 - {MAJOR}.{MINOR}.{PATCH} (eg: 1.2.3)
 
