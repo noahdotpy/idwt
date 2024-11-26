@@ -2,6 +2,14 @@
 name = "idwt"
 version = "0.1.0"
 edition = "2021"
+authors = ["noahdotpy <noahdotpy@proton.me>"]
+license = "MIT OR Apache-2.0"
+description = "A self-control utility based on configuration files"
+readme = "README.md"
+homepage = "https://github.com/noahdotpy/idwt-rs"
+repository = "https://github.com/noahdotpy/idwt-rs"
+keywords = ["cli"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
