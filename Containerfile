@@ -1,19 +1,22 @@
-FROM alpine AS alpine-dev
-RUN apk add nushell; \
-    apk add sudo; \
-    apk add yq; \
-    apk add shadow;
-COPY src /
-COPY dev /
-ENTRYPOINT [ "/usr/bin/nu", "--config", "/etc/nushell/config.nu", "--env-config", "/etc/nushell/env.nu"]
+FROM rust
+COPY . /context
+RUN cargo install --bin idwt --path /context
+RUN mkdir -p /out/bin/
+RUN mv $CARGO_HOME/bin/idwt /out/bin/idwt
 
-FROM fedora AS fedora-dev
-RUN dnf install nu e2fsprogs iptables kde-runtime ripgrep yq -y
-RUN useradd john
-COPY src /
-COPY dev /
-ENTRYPOINT [ "/usr/bin/nu", "--config", "/etc/nushell/config.nu", "--env-config", "/etc/nushell/env.nu"]
+# TODO: make a `latest` tag with the latest release version
 
-FROM scratch AS prod
-COPY src /
-COPY src /out
+# type=ref,event=tag
+# type=raw,value=git,enable={{is_default_branch}}
+# type=sha
+
+# Available tags should be (numbers changed to actual release):
+# git      (for the latest git commit)
+# {COMMIT_SHA}
+# latest   (for the latest released version)
+# v{MAJOR} (eg: v1)
+# v{MINOR} (eg: v1.2)
+# v{PATCH} (eg: v1.2.3)
+
+# To use in  another container
+# `COPY --from=ghcr.io/noahdotpy/idwt-rs:v1.2.3 /out/bin/idwt /usr/bin/idwt

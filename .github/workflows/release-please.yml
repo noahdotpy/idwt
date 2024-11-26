@@ -22,6 +22,7 @@ jobs:
           # this is a built-in strategy in release-please, see "Action Inputs"
           # for more options
           release-type: rust
+
   # Release unpublished packages.
   publish:
     runs-on: ubuntu-latest

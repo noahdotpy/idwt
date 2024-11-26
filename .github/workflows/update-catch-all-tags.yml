@@ -1,4 +1,4 @@
-name: Update Major Release Tag
+name: Update Catch-All Release Tags
 
 on:
   release:
@@ -11,11 +11,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Get major version num and update tag
+    - name: Update catch-all release tags
       run: |
         VERSION=${GITHUB_REF#refs/tags/}
         MAJOR=${VERSION%%.*}
+
         git config --global user.name 'noahdotpy'
         git config --global user.email 'noahdotpy@users.noreply.github.com'
-        git tag -fa ${MAJOR} -m "Update major version tag"
-        git push origin ${MAJOR} --force
+
+        git tag -fa "${MAJOR}" -m "Update major version tag"
+        git push origin "${MAJOR}" --force
