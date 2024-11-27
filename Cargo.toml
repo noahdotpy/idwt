@@ -21,6 +21,12 @@ indicatif = "0.17.9"
 log = "0.4.22"
 env_logger = "0.11.5"
 clap-verbosity-flag = "3.0.0"
+serde_json = "1.0.133"
+sjdiff = "0.0.5"
+diff-struct = "0.5.3"
+iptables = "0.5.2"
+figment = { version = "0.10.19", features = ["yaml"] }
+serde = "1.0.215"
 
 [dev-dependencies]
 assert_cmd = "2.0.16"
