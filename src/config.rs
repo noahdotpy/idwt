@@ -5,19 +5,19 @@ use figment::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Config {
     #[serde(rename = "block-networking")]
     block_networking: bool,
 }
 
-impl Default for Config {
-    fn default() -> Config {
-        Config {
-            block_networking: false,
-        }
-    }
-}
+// impl Default for Config {
+//     fn default() -> Config {
+//         Config {
+//             block_networking: false,
+//         }
+//     }
+// }
 
 pub fn get_config() -> Result<Config, Error> {
     let config = Figment::from(Serialized::defaults(Config::default()))

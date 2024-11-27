@@ -1,8 +1,6 @@
 use apply::ApplyArgs;
 use clap::Subcommand;
 
-use crate::config::get_config;
-
 pub mod apply;
 pub mod get_config;
 
