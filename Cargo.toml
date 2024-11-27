@@ -27,6 +27,7 @@ diff-struct = "0.5.3"
 iptables = "0.5.2"
 figment = { version = "0.10.19", features = ["yaml"] }
 serde = "1.0.215"
+serde_yaml = "0.9.34"
 
 [dev-dependencies]
 assert_cmd = "2.0.16"

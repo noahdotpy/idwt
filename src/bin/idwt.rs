@@ -1,20 +1,17 @@
-use clap::{Parser, Subcommand};
-use idwt::commands;
+use clap::Parser;
+use idwt::commands::run_command;
+use idwt::commands::Commands;
 
 #[derive(Debug, Parser)]
-// #[command(name = "git")]
-// #[command(about = "A fictional versioning CLI", long_about = None)]
+// #[command(name = "idwt")]
+// #[command(about = "IDWT", long_about = None)]
 #[clap(version)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
-#[derive(Debug, Subcommand)]
-enum Commands {
-    Apply(commands::apply::ApplyArgs),
-}
-
-fn main() {
-    let _args = Cli::parse();
+fn main() -> Result<(), anyhow::Error> {
+    let cli = Cli::parse();
+    run_command(cli.command)
 }
