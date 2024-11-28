@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::Parser;
 use idwt::commands::run_command;
 use idwt::commands::Commands;
@@ -16,7 +17,7 @@ struct Cli {
     verbose: clap_verbosity_flag::Verbosity,
 }
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<()> {
     let cli = Cli::parse();
     env_logger::init();
     info!("starting up");

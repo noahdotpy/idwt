@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::Result;
 use figment::{
     providers::{Format, Serialized, Yaml},
     Figment,
@@ -78,7 +78,7 @@ pub struct DisconnectFlatpaks {
 //     }
 // }
 
-pub fn get_config() -> Result<Config, Error> {
+pub fn get_config() -> Result<Config> {
     let config = Figment::from(Serialized::defaults(Config::default()))
         .merge(Yaml::file("/etc/idwt/config.yml"))
         .admerge(Yaml::file("/usr/share/idwt/config.yml"))

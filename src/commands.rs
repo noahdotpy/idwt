@@ -1,3 +1,4 @@
+use anyhow::Result;
 use apply::{ApplyArgs, ApplyCommands, ApplySystemCommands};
 use clap::Subcommand;
 
@@ -10,13 +11,14 @@ pub enum Commands {
     GetConfig,
 }
 
-pub fn run_command(command: Commands) -> Result<(), anyhow::Error> {
+pub fn run_command(command: Commands) -> Result<()> {
     match command {
         Commands::GetConfig => get_config::get_config(),
         Commands::Apply(args) => match args.command {
             ApplyCommands::System(args) => match args.command {
                 ApplySystemCommands::All => todo!(),
                 ApplySystemCommands::RevokeAdmin => apply::revoke_admin::revoke_admin(),
+                ApplySystemCommands::BlockNetworking => apply::block_networking::block_networking(),
             },
         },
     }
