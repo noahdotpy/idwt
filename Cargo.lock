@@ -565,6 +565,7 @@ dependencies = [
  "indicatif",
  "iptables",
  "log",
+ "nix",
  "predicates",
  "serde",
  "serde_json",

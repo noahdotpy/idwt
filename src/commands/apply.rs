@@ -1,6 +1,6 @@
 use clap::Subcommand;
 
-pub mod system;
+pub mod revoke_admin;
 
 /*
 `apply system block-flatpak-networking`
@@ -9,10 +9,23 @@ pub mod system;
 #[derive(Debug, clap::Args)]
 pub struct ApplyArgs {
     #[command(subcommand)]
-    command: ApplyCommands,
+    pub command: ApplyCommands,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum ApplyCommands {
-    System(system::ApplySystemArgs),
+    System(ApplySystemArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ApplySystemArgs {
+    #[command(subcommand)]
+    pub command: ApplySystemCommands,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum ApplySystemCommands {
+    All,
+    // BlockFlatpakNetworking,
+    RevokeAdmin,
 }
