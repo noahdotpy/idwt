@@ -4,7 +4,7 @@ use log::{error, info};
 use std::process::Command;
 
 // TODO: Filter out users to revoke to only the ones in affected-users as well
-pub fn revoke_admin() -> Result<()> {
+pub fn apply_revoke_admin() -> Result<()> {
     let config = get_config()?;
     let groups_to_remove = vec!["wheel", "sudo"];
 

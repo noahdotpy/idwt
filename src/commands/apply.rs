@@ -1,5 +1,6 @@
 use clap::Subcommand;
 
+pub mod all;
 pub mod block_networking;
 pub mod revoke_admin;
 

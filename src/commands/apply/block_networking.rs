@@ -2,7 +2,7 @@ use crate::config::get_config;
 use anyhow::{anyhow, Result};
 use log::{error, info};
 
-pub fn block_networking() -> Result<()> {
+pub fn apply_block_networking() -> Result<()> {
     let config = get_config()?;
     let iptable = iptables::new(false);
     let iptable = match iptable {
