@@ -1,5 +1,11 @@
 # I Don't Want To (IDWT)
 
+## Runtime Dependencies
+
+- A system with `iptables` enabled
+- `libjq` at runtime
+- `gpasswd` for the `revoke-admin` module
+
 ## Usage
 
 ### How to use in containers
@@ -22,4 +28,3 @@ Below is an example of copying /out/bin/idwt to /usr/bin/idwt with idwt-rs versi
 ```containerfile
 COPY --from=ghcr.io/noahdotpy/idwt-rs:1.2.3 /out/bin/idwt /usr/bin/idwt
 ```
-
