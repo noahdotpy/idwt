@@ -61,10 +61,10 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
                 let re = Regex::new(rule.0).unwrap();
                 re.is_match(&jq_evaluation)
             })
-            // if match was made in other_delays, use that delay
-            .and_then(|rule| Some(rule.1))
+            // if found a match in other_delays, use that delay
+            .map(|rule| rule.1)
             // else use the main delay
-            .or_else(|| Some(&config.tightener.main_delay))
+            .or(Some(&config.tightener.main_delay))
             .unwrap();
 
         let time_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
