@@ -2,6 +2,7 @@ use clap::Subcommand;
 
 pub mod all;
 pub mod block_networking;
+pub mod delayed_edits;
 pub mod revoke_admin;
 
 /*
@@ -16,6 +17,7 @@ pub struct ApplyArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum ApplyCommands {
+    // The apply commands that need to be ran as root
     System(ApplySystemArgs),
 }
 
@@ -27,7 +29,21 @@ pub struct ApplySystemArgs {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum ApplySystemCommands {
+    // Run every `apply system` command
     All,
+
+    // Apply configuration from the block-networking module
     BlockNetworking,
+
+    // Apply configuration from the revoke-admin module
     RevokeAdmin,
+
+    // Apply delayed edits that are set to be applied now
+    DelayedEdits,
 }
+
+/*
+WARNING:
+Apply commands should always just print errors to logs and
+never interfere with the execution of the other apply commands.
+*/

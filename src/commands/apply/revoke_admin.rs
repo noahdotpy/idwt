@@ -10,7 +10,7 @@ pub fn apply_revoke_admin() -> Result<()> {
 
     for username in config.revoke_admin {
         for group in &groups_to_remove {
-            let result = Command::new("gpasswd")
+            let result = Command::new("/usr/bin/gpasswd")
                 .arg("-d")
                 .arg(&username)
                 .arg(group)

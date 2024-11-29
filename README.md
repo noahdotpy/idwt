@@ -3,8 +3,9 @@
 ## Runtime Dependencies
 
 - A system with `iptables` enabled
-- `libjq` at runtime
-- `gpasswd` for the `revoke-admin` module
+- `/usr/bin/yq` for the `tighten` command
+- `/usr/bin/sudo` for the `edit` command
+- `/usr/bin/gpasswd` for the `revoke-admin` module
 
 ## Usage
 

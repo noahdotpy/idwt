@@ -6,7 +6,6 @@ use log::info;
 use log::warn;
 
 #[derive(Debug, Parser)]
-// #[command(name = "idwt")]
 // #[command(about = "IDWT", long_about = None)]
 #[clap(version)]
 struct Cli {

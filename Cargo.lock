@@ -565,9 +565,11 @@ dependencies = [
  "indicatif",
  "iptables",
  "jq-rs",
+ "karen",
  "log",
  "nix",
  "predicates",
+ "regex",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -661,6 +663,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a88f1bda2bd75b0452a14784937d796722fdebfe50df998aeb3f0b7603019a9"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "karen"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92794784d4ce2ae40650b824650f005aa7fd6dbdeb636f6260c9153f927d1e72"
+dependencies = [
+ "libc",
+ "log",
 ]
 
 [[package]]

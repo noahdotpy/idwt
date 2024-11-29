@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+
 use anyhow::Result;
 use figment::{
     providers::{Format, Serialized, Yaml},
     Figment,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::constants;
 
 #[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -52,10 +56,14 @@ pub struct KillWindow {
 
 #[derive(Deserialize, Debug, Serialize, Default)]
 pub struct Tightener {
-    pub delay: i32,
+    #[serde(rename = "other-delays")]
+    pub other_delays: HashMap<String, u64>, // `delays: [{regex: delay}]`
 
-    #[serde(rename = "approved-commands")]
-    pub approved_commands: Vec<String>,
+    #[serde(rename = "main-delay")]
+    pub main_delay: u64,
+
+    #[serde(rename = "allowed")]
+    pub allowed: Vec<String>,
 
     #[serde(rename = "delay-enabled")]
     pub delay_enabled: bool,
@@ -80,8 +88,8 @@ pub struct DisconnectFlatpaks {
 
 pub fn get_config() -> Result<Config> {
     let config = Figment::from(Serialized::defaults(Config::default()))
-        .merge(Yaml::file("/etc/idwt/config.yml"))
-        .admerge(Yaml::file("/usr/share/idwt/config.yml"))
+        .merge(Yaml::file(constants::ETC_CONFIG))
+        .admerge(Yaml::file(constants::USR_CONFIG))
         .extract()?;
     Ok(config)
 }
