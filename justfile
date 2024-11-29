@@ -7,6 +7,3 @@ container-enter:
 
 container-build:
     podman build -t idwt-rs .
-
-test:
-    nu {{ project_root }}/tests/mod.nu
