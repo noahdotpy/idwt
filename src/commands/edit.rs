@@ -31,7 +31,7 @@ If there are delays defined in `.tightener.delays` then these will be used to
 Check if command matches any regexes in `.tightener.allow`
 */
 
-fn does_string_match_any_regexes(string: &String, regexes: &Vec<String>) -> Result<bool> {
+fn does_string_match_any_regexes(string: &str, regexes: &Vec<String>) -> Result<bool> {
     for regex_s in regexes {
         let re = Regex::new(regex_s)?;
         match re.is_match(string) {
@@ -64,8 +64,7 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
             // if found a match in other_delays, use that delay
             .map(|rule| rule.1)
             // else use the main delay
-            .or(Some(&config.tightener.main_delay))
-            .unwrap();
+            .unwrap_or(&config.tightener.main_delay);
 
         let time_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
         let time_to_apply = time_since_epoch.add(Duration::new(delay.to_owned().to_owned(), 0));
