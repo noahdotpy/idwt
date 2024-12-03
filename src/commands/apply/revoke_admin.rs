@@ -1,10 +1,16 @@
 use crate::config::get_config;
+use anyhow::anyhow;
 use anyhow::Result;
 use log::{error, info};
 use std::process::Command;
 
 // TODO: Filter out users to revoke to only the ones in affected-users as well
 pub fn apply_revoke_admin() -> Result<()> {
+    let result = karen::escalate_if_needed();
+    if let Err(error) = result {
+        error!("Error escalating privileges");
+        return Err(anyhow!(error.to_string()));
+    }
     let config = get_config()?;
     let groups_to_remove = vec!["wheel", "sudo"];
 

@@ -3,6 +3,11 @@ use anyhow::{anyhow, Result};
 use log::{error, info};
 
 pub fn apply_block_networking() -> Result<()> {
+    let result = karen::escalate_if_needed();
+    if let Err(error) = result {
+        error!("Error escalating privileges");
+        return Err(anyhow!(error.to_string()));
+    }
     let config = get_config()?;
     let iptable = iptables::new(false);
     let iptable = match iptable {

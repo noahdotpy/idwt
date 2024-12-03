@@ -34,8 +34,8 @@ pub struct Config {
     #[serde(rename = "kill-processes")]
     pub kill_processes: KillProcesses,
 
-    #[serde(rename = "disconnect-flatpaks")]
-    pub disconnect_flatpaks: DisconnectFlatpaks,
+    #[serde(rename = "block-flatpaks")]
+    pub block_flatpaks: BlockFlatpaks,
 }
 
 #[derive(Deserialize, Debug, Serialize, Default)]
@@ -70,12 +70,12 @@ pub struct Tightener {
 }
 
 #[derive(Deserialize, Debug, Serialize, Default)]
-pub struct DisconnectFlatpaks {
-    pub exclude: Vec<String>,
-    pub include: Vec<String>,
+pub struct BlockFlatpaks {
+    pub allow: Vec<String>,
+    pub block: Vec<String>,
 
-    #[serde(rename = "include-by-default")]
-    pub include_by_default: bool,
+    #[serde(rename = "block-by-default")]
+    pub block_by_default: bool,
 }
 
 // impl Default for Config {
