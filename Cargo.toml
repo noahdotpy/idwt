@@ -38,3 +38,9 @@ walkdir = "2.5.0"
 assert_cmd = "2.0.16"
 predicates = "3.1.2"
 assert_fs = "1.1.1"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unused_must_use = "deny"
