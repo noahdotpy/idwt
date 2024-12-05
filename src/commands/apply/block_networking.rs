@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use crate::config::get_config;
 use anyhow::{anyhow, Result};
 use log::{error, info};
@@ -8,27 +10,39 @@ pub fn apply_block_networking() -> Result<()> {
         error!("Error escalating privileges");
         return Err(anyhow!(error.to_string()));
     }
+
+    // TODO: Maybe I shouldn't use `?`
     let config = get_config()?;
-    let iptable = iptables::new(false);
-    let iptable = match iptable {
-        Ok(out) => out,
-        Err(error) => {
-            error!("Error getting iptable: {error}");
-            return Err(anyhow!(error.to_string()));
-        }
-    };
 
     for username in config.affected_users {
         info!("Adding REJECT rule to {username}");
-        let rule = format!("-m owner --uid-owner {username} -j REJECT");
-        let result = iptable.append_unique("nat", "OUTPUT", &rule);
+        let result = Command::new("/usr/sbin/iptables")
+            .arg("-A")
+            .arg("OUTPUT")
+            .arg("-m")
+            .arg("owner")
+            .arg("--uid-owner")
+            .arg(&username)
+            .arg("-j")
+            .arg("REJECT")
+            .output();
 
-        if let Err(error) = result {
-            error!("Error appending to table");
-            return Err(anyhow!(error.to_string()));
+        let output = match result {
+            Ok(out) => out,
+            Err(error) => {
+                error!("Error adding REJECT rule: {error}");
+                continue;
+            }
+        };
+
+        if output.status.success() {
+            info!("Successfully added REJECT rule to {username}");
+        } else {
+            error!(
+                "Error adding REJECT rule {username}: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
         }
-
-        info!("Successfully added REJECT rule to {username}");
     }
 
     Ok(())

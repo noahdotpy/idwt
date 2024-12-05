@@ -1,8 +1,37 @@
 use anyhow::anyhow;
 use anyhow::Result;
 use log::error;
-use std::os::unix::ffi::OsStrExt;
-use std::{ffi::OsStr, fs};
+use std::path::PathBuf;
+use walkdir::WalkDir;
+
+use crate::config::get_config;
+
+/// Returns a list of files in the given directory with the `.desktop` extension.
+///
+/// # Arguments
+/// * `dir` - A path to the directory to search.
+///
+/// # Returns
+/// A `Vec<PathBuf>` containing paths to files with the `.desktop` extension.
+/// If no such files are found, the vector will be empty.
+///
+/// # Panics
+/// This function will panic if the directory cannot be accessed.
+fn find_desktop_files(dir: &str) -> Vec<PathBuf> {
+    let mut desktop_files = Vec::new();
+
+    for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok) {
+        if entry.file_type().is_file() {
+            if let Some(extension) = entry.path().extension() {
+                if extension == "desktop" {
+                    desktop_files.push(entry.path().to_path_buf());
+                }
+            }
+        }
+    }
+
+    desktop_files
+}
 
 /*
 This module should create symlinks in `$HOME/.local/share/flatpak/overrides`
@@ -12,68 +41,28 @@ configuration that disables the flatpak's access to the x11 and wayland socket,
 and blocks internet.
 
 After this module creates all the files it should then delete all the files
-in `$HOME/.local/share/flatpak/overrides` that are targetting a non-existent file.
+in `$HOME/.local/share/flatpak/overrides` that are targetting a non-existent file pointing to the store somewhere.
 This is often called a broken symlink.
-
-# To get the list of flatpaks to block:
-    - If `block-by-default = true` then block all flatpaks installed that
-      are not explicity allowed.
-    - If `block-by-default = false` (default) then only block the flatpaks listed
-      as explicity blocked.
-
-List installed flatpaks using commands:
-
-flatpak list --system --columns app --app | lines
-sudo -u john flatpak list --system --columns app --app | lines
-
-List installed flatpaks using the .desktop file directories
-
-/var/lib/flatpak/exports/share/applications
-/home/john/.local/share/flatpak/exports/share/applications
-
-Only get the files ending in `.desktop` because these are the actual application names.
-Then get rid of the `.desktop` so its only the flatpak id.
-
 */
 
-fn get_installed_flatpaks() -> Result<()> {
-    // todo!();
-    let system_location = "/var/lib/flatpak/exports/share/applications";
-    let files = fs::read_dir("/etc")
-        .unwrap()
-        .filter_map(Result::ok)
-        .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"conf")))
-        .for_each(|f| f.path().to_str().or(None);
-    // files
-    //     .filter_map(Result::ok)
-    //     .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"conf")))
-    //     .for_each(|f| println!("{:?}", f));
-    // let system_apps = fs::read_dir("/var/lib/flatpak/exports/share/applications")?
+fn get_flatpak_desktops() -> Result<Vec<PathBuf>> {
+    let system_dir = "/var/lib/flatpak/exports/bin";
+    let system_files = find_desktop_files(system_dir);
 
-    //     .filter_map(|e| match e {
-    //         Ok(out) => {
-    //             let extension = out.path().extension();
-    //             if extension == Some(OsStr::new("desktop")) {
-    //                 Some(out.path())
-    //             } else {
-    //                 None
-    //             }
-    //         }
-    //         Err(err) => {
-    //             error!("Error listing .desktop files in system location");
-    //             None
-    //         }
-    //     })
-    //     .collect();
-    // println!("{:?}", system);
-    Ok(())
-    // for entry in WalkDir::new("foo").into_iter().filter_map(|e| e.ok()) {
-    //     println!("{}", entry.path().display());
-    // }
-}
+    let config = get_config();
 
-fn get_block_list() -> Result<()> {
-    todo!();
+    let mut user_files: Vec<PathBuf> = vec![];
+
+    for user in config.unwrap().affected_users {
+        let this_dir = format!("/home/{user}/.local/share/flatpak/exports/bin");
+        let this_files = find_desktop_files(&this_dir);
+        for file in this_files {
+            user_files.push(file);
+        }
+    }
+
+    let all_files = [system_files, user_files].concat();
+    Ok(all_files)
 }
 
 pub fn apply_block_flatpaks() -> Result<()> {
@@ -82,5 +71,38 @@ pub fn apply_block_flatpaks() -> Result<()> {
         error!("Error escalating privileges");
         return Err(anyhow!(error.to_string()));
     }
-    todo!();
+
+    let config = get_config().unwrap();
+
+    // use .file_stem() to get the raw file name (which is the flatpak id)
+    let desktop_files = get_flatpak_desktops();
+
+    /*
+    loop through all desktop_files
+        get file_stem (app_id)
+        if app_id in blocked -> block
+        if block-by-default and app_id not in allowed -> block
+        allow
+    */
+    for app in desktop_files.unwrap_or_default() {
+        let app_id = app
+            .file_stem()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or_default()
+            .to_owned();
+        if config.block_flatpaks.block.contains(&app_id)
+            || (config.block_flatpaks.block_by_default
+                && !(config.block_flatpaks.allow.contains(&app_id)))
+        {
+            todo!("block");
+            /*
+            make file at /var/lib/idwt/store/flatpak_overrides/
+            make symlink at ~/.local/share/flatpak/overrides/{app_id} targetting the file at /var/lib/idwt/store/...
+            */
+            continue;
+        }
+    }
+    // TODO: Cleanup leftover files that are broken symlinks targetting /var/lib/idwt/store/flatpak_overrides/...
+    todo!("cleanup")
 }

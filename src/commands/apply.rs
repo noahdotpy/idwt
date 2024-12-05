@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 pub mod all;
-// TODO: implement: pub mod block_flatpaks;
+pub mod block_flatpaks;
 pub mod block_networking;
 pub mod delayed_edits;
 pub mod revoke_admin;
