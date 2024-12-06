@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/noahdotpy/idwt-rs/compare/v0.2.0...v0.2.1) (2024-12-06)
+
+
+### Bug Fixes
+
+* unhide get-config from help ([8974271](https://github.com/noahdotpy/idwt-rs/commit/89742718590ecb19c39e6c3fa4c44f723a72c0a4))
+
 ## [0.2.0](https://github.com/noahdotpy/idwt-rs/compare/v0.1.0...v0.2.0) (2024-12-06)
 
 
