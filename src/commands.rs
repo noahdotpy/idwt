@@ -12,13 +12,10 @@ pub enum Commands {
     Apply(ApplyArgs),
 
     // Get the config just as the code has it, all parsed and everything
-    #[command(hide = true)]
     GetConfig,
 
     // Allow approved config file patches without the need for admin privileges
-    Edit {
-        jq_evaluation: String,
-    },
+    Edit { jq_evaluation: String },
 }
 
 pub fn run_command(command: Commands) -> Result<()> {
