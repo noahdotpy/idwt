@@ -1,10 +1,12 @@
 use anyhow::anyhow;
 use anyhow::Result;
 use log::error;
+use std::io::Write;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
 use crate::config::get_config;
+use crate::constants::STORE_DIR;
 
 /// Returns a list of files in the given directory with the `.desktop` extension.
 ///
@@ -49,11 +51,11 @@ fn get_flatpak_desktops() -> Result<Vec<PathBuf>> {
     let system_dir = "/var/lib/flatpak/exports/bin";
     let system_files = find_desktop_files(system_dir);
 
-    let config = get_config();
+    let config = get_config()?;
 
     let mut user_files: Vec<PathBuf> = vec![];
 
-    for user in config.unwrap().affected_users {
+    for user in config.affected_users {
         let this_dir = format!("/home/{user}/.local/share/flatpak/exports/bin");
         let this_files = find_desktop_files(&this_dir);
         for file in this_files {
@@ -72,7 +74,7 @@ pub fn apply_block_flatpaks() -> Result<()> {
         return Err(anyhow!(error.to_string()));
     }
 
-    let config = get_config().unwrap();
+    let config = get_config()?;
 
     // use .file_stem() to get the raw file name (which is the flatpak id)
     let desktop_files = get_flatpak_desktops();
@@ -95,14 +97,87 @@ pub fn apply_block_flatpaks() -> Result<()> {
             || (config.block_flatpaks.block_by_default
                 && !(config.block_flatpaks.allow.contains(&app_id)))
         {
-            todo!("block");
+            let store_file_path = format!("{STORE_DIR}/flatpak_overrides/{app_id}");
+            let file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true) // Create the file if it doesn't exist.
+                .truncate(true) // Truncate (overwrite) the file if it exists.
+                .open(&store_file_path);
+
+            let mut file = match file {
+                Ok(file_obj) => file_obj,
+                Err(err) => {
+                    log::error!(
+                        "Error opening store file `{store_file_path}` override for writing: {err}"
+                    );
+                    continue;
+                }
+            };
+
+            let mut override_content = String::new();
+
+            override_content.push_str("[Context]\n");
+            override_content.push_str("shared=!ipc;!network\n");
+            override_content.push_str("sockets=!pulseaudio;!wayland;!x11");
+
+            if let Err(err) = file.write_all(&override_content.into_bytes()) {
+                log::error!(
+                    "Error writing contents to store's override file for `{app_id}`: {err}"
+                );
+            }
+            for username in &config.affected_users {
+                let home_dir = if let Ok(Some(user)) = nix::unistd::User::from_name(username) {
+                    // Return the home directory if available
+                    user.dir.to_str().map(|s| s.to_string())
+                } else {
+                    log::error!("Error finding home directory of {username}");
+                    continue;
+                };
+                match home_dir {
+                    Some(home_dir) => {
+                        let home_file_path = std::path::Path::new(&home_dir);
+                        let home_file_path = home_file_path.join(".local/share/flatpak/overrides/");
+                        let home_file_path = home_file_path.join(&app_id);
+
+                        log::info!(
+                            "Making symlink at {} pointing to {store_file_path}",
+                            home_file_path.display()
+                        );
+
+                        if let Err(err) =
+                            std::os::unix::fs::symlink(&store_file_path, &home_file_path)
+                        {
+                            error!(
+                                "Error creating symlink at {} pointing to {store_file_path}: {err}",
+                                home_file_path.display()
+                            );
+                        } else {
+                            continue;
+                        };
+
+                        let output = std::process::Command::new("chattr")
+                            .arg("+i") // +i flag to set the immutable attribute
+                            .arg(&home_file_path)
+                            .output();
+
+                        if let Err(err) = output {
+                            log::error!(
+                                "Error making {} immutable: {err}",
+                                home_file_path.display()
+                            );
+                        }
+                    }
+                    None => continue,
+                }
+            }
             /*
-            make file at /var/lib/idwt/store/flatpak_overrides/
-            make symlink at ~/.local/share/flatpak/overrides/{app_id} targetting the file at /var/lib/idwt/store/...
+            - [x] make file at /var/lib/idwt/store/flatpak_overrides/
+            - [x] make symlink at ~/.local/share/flatpak/overrides/{app_id} targetting the file at /var/lib/idwt/store/...
+            - [x] make symlink immutable (so user can't delete it)
             */
-            continue;
         }
     }
     // TODO: Cleanup leftover files that are broken symlinks targetting /var/lib/idwt/store/flatpak_overrides/...
-    todo!("cleanup")
+    // todo!("cleanup")
+    Ok(())
 }

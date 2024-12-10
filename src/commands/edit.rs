@@ -58,7 +58,14 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
             .iter()
             .find(|rule| {
                 // get first key in hashmap that matches with jq_evaluation
-                let re = Regex::new(rule.0).unwrap();
+                let re = Regex::new(rule.0);
+                let re = match re {
+                    Ok(out) => out,
+                    Err(err) => {
+                        log::error!("Error occured while parsing regex {}: {err}", rule.0);
+                        return false;
+                    }
+                };
                 re.is_match(&jq_evaluation)
             })
             // if found a match in other_delays, use that delay
