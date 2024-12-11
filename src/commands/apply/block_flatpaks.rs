@@ -2,6 +2,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use log::error;
 use std::io::Write;
+use std::path::Path;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
@@ -67,6 +68,86 @@ fn get_flatpak_desktops() -> Result<Vec<PathBuf>> {
     Ok(all_files)
 }
 
+fn cleanup_overrides() -> Result<()> {
+    let config = get_config()?;
+    for username in config.affected_users {
+        let home_dir = if let Ok(Some(user)) = nix::unistd::User::from_name(&username) {
+            // Return the home directory if available
+            user.dir.to_str().map(|s| s.to_string())
+        } else {
+            log::error!("Error finding home directory of {username}");
+            continue;
+        };
+        if let Some(out) = home_dir {
+            let home_file_path = std::path::Path::new(&out);
+            let home_file_path = home_file_path.join(".local/share/flatpak/overrides/");
+            match cleanup_dir(&home_file_path) {
+                Ok(_out) => {
+                    log::info!("Cleaned up {}", home_file_path.display());
+                }
+                Err(err) => {
+                    log::error!("Error cleaning up {}: {err}", home_file_path.display());
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn cleanup_dir(overrides_dir: &Path) -> Result<()> {
+    let target_dir = Path::new(STORE_DIR).join("flatpak_overrides");
+
+    // Ensure the overrides directory exists
+    if !overrides_dir.is_dir() {
+        log::info!(
+            "Overrides directory does not exist, skipping cleanup: {}",
+            overrides_dir.display()
+        );
+        return Ok(());
+    }
+
+    // Iterate through the entries in the overrides directory
+    let entries = std::fs::read_dir(overrides_dir);
+    if let Err(err) = entries {
+        log::error!(
+            "Error reading overrides directory ({}): {err}",
+            overrides_dir.display()
+        );
+        return Ok(());
+    } else {
+        for entry in entries? {
+            let entry = entry?;
+            let path = entry.path();
+
+            // Check if the entry is a symlink
+            if path.is_symlink() {
+                // Resolve the symlink target
+                if let Ok(target) = std::fs::read_link(&path) {
+                    // Check if the target starts with the target directory path
+                    if target.starts_with(&target_dir) && target.try_exists().is_ok_and(|x| x) {
+                        // Delete the symlink
+                        if let Err(err) = std::fs::remove_file(&path) {
+                            log::error!(
+                                "Error deleting override symlink {}: {err}",
+                                path.display()
+                            );
+                        };
+                        log::info!(
+                            "Deleted symlink: {} -> {}",
+                            path.display(),
+                            target.display()
+                        );
+                    }
+                } else {
+                    log::error!("Failed to resolve symlink: {}", path.display());
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
 pub fn apply_block_flatpaks() -> Result<()> {
     let result = karen::escalate_if_needed();
     if let Err(error) = result {
@@ -76,7 +157,6 @@ pub fn apply_block_flatpaks() -> Result<()> {
 
     let config = get_config()?;
 
-    // use .file_stem() to get the raw file name (which is the flatpak id)
     let desktop_files = get_flatpak_desktops();
 
     /*
@@ -170,14 +250,15 @@ pub fn apply_block_flatpaks() -> Result<()> {
                     None => continue,
                 }
             }
-            /*
-            - [x] make file at /var/lib/idwt/store/flatpak_overrides/
-            - [x] make symlink at ~/.local/share/flatpak/overrides/{app_id} targetting the file at /var/lib/idwt/store/...
-            - [x] make symlink immutable (so user can't delete it)
-            */
         }
     }
-    // TODO: Cleanup leftover files that are broken symlinks targetting /var/lib/idwt/store/flatpak_overrides/...
-    // todo!("cleanup")
+    match cleanup_overrides() {
+        Ok(_out) => {
+            log::info!("Cleaned up all override succesfully")
+        }
+        Err(err) => {
+            log::error!("Error occured while cleaning overrides: {err}")
+        }
+    };
     Ok(())
 }

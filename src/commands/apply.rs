@@ -36,6 +36,9 @@ pub enum ApplySystemCommands {
     // Apply configuration from the block-networking module
     BlockNetworking,
 
+    // Apply configuration from the block-flatpaks module
+    BlockFlatpaks,
+
     // Apply configuration from the revoke-admin module
     RevokeAdmin,
 

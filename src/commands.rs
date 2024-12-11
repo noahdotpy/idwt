@@ -29,6 +29,7 @@ pub fn run_command(command: Commands) -> Result<()> {
                 ApplySystemCommands::BlockNetworking => {
                     apply::block_networking::apply_block_networking()
                 }
+                ApplySystemCommands::BlockFlatpaks => apply::block_flatpaks::apply_block_flatpaks(),
             },
         },
         Commands::Edit { jq_evaluation } => edit::edit(jq_evaluation),
