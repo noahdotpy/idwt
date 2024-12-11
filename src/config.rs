@@ -86,7 +86,7 @@ pub struct BlockFlatpaks {
 //     }
 // }
 
-pub fn get_config() -> Result<Config> {
+pub fn get_config() -> anyhow::Result<Config> {
     let config = Figment::from(Serialized::defaults(Config::default()))
         .merge(Yaml::file(constants::ETC_CONFIG))
         .admerge(Yaml::file(constants::USR_CONFIG))

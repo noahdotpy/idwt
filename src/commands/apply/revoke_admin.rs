@@ -1,20 +1,18 @@
 use crate::config::get_config;
-use anyhow::anyhow;
-use anyhow::Result;
 use log::{error, info};
 use std::process::Command;
 
-// TODO: Filter out users to revoke to only the ones in affected-users as well
-pub fn apply_revoke_admin() -> Result<()> {
-    let result = karen::escalate_if_needed();
-    if let Err(error) = result {
-        error!("Error escalating privileges");
-        return Err(anyhow!(error.to_string()));
-    }
+pub fn apply_revoke_admin() -> anyhow::Result<()> {
     let config = get_config()?;
     let groups_to_remove = vec!["wheel", "sudo"];
 
     for username in config.revoke_admin {
+        if !config.affected_users.contains(&username) {
+            log::warn!(
+                "{username} is not in affected-users, skipping execution of revoke admin command"
+            );
+            continue;
+        }
         for group in &groups_to_remove {
             let result = Command::new("/usr/bin/gpasswd")
                 .arg("-d")

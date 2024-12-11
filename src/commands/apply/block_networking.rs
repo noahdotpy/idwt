@@ -1,17 +1,10 @@
 use std::process::Command;
 
 use crate::config::get_config;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use log::{error, info};
 
-pub fn apply_block_networking() -> Result<()> {
-    let result = karen::escalate_if_needed();
-    if let Err(error) = result {
-        error!("Error escalating privileges");
-        return Err(anyhow!(error.to_string()));
-    }
-
-    // TODO: Maybe I shouldn't use `?`
+pub fn apply_block_networking() -> anyhow::Result<()> {
     let config = get_config()?;
 
     for username in config.affected_users {

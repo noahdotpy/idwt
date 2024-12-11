@@ -48,7 +48,7 @@ in `$HOME/.local/share/flatpak/overrides` that are targetting a non-existent fil
 This is often called a broken symlink.
 */
 
-fn get_flatpak_desktops() -> Result<Vec<PathBuf>> {
+fn get_flatpak_desktops() -> anyhow::Result<Vec<PathBuf>> {
     let system_dir = "/var/lib/flatpak/exports/bin";
     let system_files = find_desktop_files(system_dir);
 
@@ -68,7 +68,7 @@ fn get_flatpak_desktops() -> Result<Vec<PathBuf>> {
     Ok(all_files)
 }
 
-fn cleanup_overrides() -> Result<()> {
+fn cleanup_overrides() -> anyhow::Result<()> {
     let config = get_config()?;
     for username in config.affected_users {
         let home_dir = if let Ok(Some(user)) = nix::unistd::User::from_name(&username) {
@@ -94,7 +94,7 @@ fn cleanup_overrides() -> Result<()> {
     Ok(())
 }
 
-fn cleanup_dir(overrides_dir: &Path) -> Result<()> {
+fn cleanup_dir(overrides_dir: &Path) -> anyhow::Result<()> {
     let target_dir = Path::new(STORE_DIR).join("flatpak_overrides");
 
     // Ensure the overrides directory exists
@@ -148,13 +148,7 @@ fn cleanup_dir(overrides_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn apply_block_flatpaks() -> Result<()> {
-    let result = karen::escalate_if_needed();
-    if let Err(error) = result {
-        error!("Error escalating privileges");
-        return Err(anyhow!(error.to_string()));
-    }
-
+pub fn apply_block_flatpaks() -> anyhow::Result<()> {
     let config = get_config()?;
 
     let desktop_files = get_flatpak_desktops();

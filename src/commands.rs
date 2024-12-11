@@ -18,19 +18,27 @@ pub enum Commands {
     Edit { jq_evaluation: String },
 }
 
-pub fn run_command(command: Commands) -> Result<()> {
+pub fn run_command(command: Commands) -> anyhow::Result<()> {
     match command {
         Commands::GetConfig => get_config::print_config(),
         Commands::Apply(args) => match args.command {
-            ApplyCommands::System(args) => match args.command {
-                ApplySystemCommands::All => apply::all::apply_all(),
-                ApplySystemCommands::DelayedEdits => todo!(),
-                ApplySystemCommands::RevokeAdmin => apply::revoke_admin::apply_revoke_admin(),
-                ApplySystemCommands::BlockNetworking => {
-                    apply::block_networking::apply_block_networking()
+            ApplyCommands::System(args) => {
+                if let Err(error) = karen::escalate_if_needed() {
+                    return Err(anyhow::anyhow!("Error escalating privileges: {error}"));
                 }
-                ApplySystemCommands::BlockFlatpaks => apply::block_flatpaks::apply_block_flatpaks(),
-            },
+
+                match args.command {
+                    ApplySystemCommands::All => apply::all::apply_all(),
+                    ApplySystemCommands::DelayedEdits => todo!(),
+                    ApplySystemCommands::RevokeAdmin => apply::revoke_admin::apply_revoke_admin(),
+                    ApplySystemCommands::BlockNetworking => {
+                        apply::block_networking::apply_block_networking()
+                    }
+                    ApplySystemCommands::BlockFlatpaks => {
+                        apply::block_flatpaks::apply_block_flatpaks()
+                    }
+                }
+            }
         },
         Commands::Edit { jq_evaluation } => edit::edit(jq_evaluation),
     }

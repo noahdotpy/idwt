@@ -30,7 +30,7 @@ If there are delays defined in `.tightener.delays` then these will be used to
 Check if command matches any regexes in `.tightener.allow`
 */
 
-fn does_string_match_any_regexes(string: &str, regexes: &Vec<String>) -> Result<bool> {
+fn does_string_match_any_regexes(string: &str, regexes: &Vec<String>) -> anyhow::Result<bool> {
     for regex_s in regexes {
         let re = Regex::new(regex_s)?;
         match re.is_match(string) {
@@ -41,10 +41,9 @@ fn does_string_match_any_regexes(string: &str, regexes: &Vec<String>) -> Result<
     Ok(false)
 }
 
-pub fn edit(jq_evaluation: String) -> Result<()> {
-    let rs = karen::escalate_if_needed();
-    if let Err(err) = rs {
-        return Err(anyhow!(err.to_string()));
+pub fn edit(jq_evaluation: String) -> anyhow::Result<()> {
+    if let Err(error) = karen::escalate_if_needed() {
+        return Err(anyhow::anyhow!("Error escalating privileges: {error}"));
     }
 
     log::trace!("Getting config");
