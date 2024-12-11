@@ -23,6 +23,7 @@ Tags available:
 - `{COMMIT_SHA}` (eg: 74224c0)
 - `{MAJOR}` (eg: 1)
 - `{MAJOR}.{MINOR}.{PATCH}` (eg: 1.2.3)
+- `latest` (for the latest released version
 
 Below is an example of copying /out/bin/idwt to /usr/bin/idwt with idwt version 1.2.3
 
