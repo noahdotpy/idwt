@@ -60,7 +60,7 @@ pub struct Tightener {
     pub other_delays: HashMap<String, u64>, // `delays: [{regex: delay}]`
 
     #[serde(rename = "main-delay")]
-    pub main_delay: u64,
+    pub main_delay: Option<u64>,
 
     #[serde(rename = "allowed")]
     pub allowed: Vec<String>,

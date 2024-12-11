@@ -9,7 +9,7 @@ use crate::{
     constants,
     state::{get_state, DelayedEdit},
 };
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 use log::error;
 use regex::Regex;
 
@@ -49,10 +49,26 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
         return Err(anyhow!(error.to_string()));
     }
 
+    log::trace!("Getting config");
     let config = crate::config::get_config()?;
 
-    if !does_string_match_any_regexes(&jq_evaluation, &config.tightener.allowed)? {
-        let delay = &config
+    // if string matches any regexes then apply that string and return
+    // else if delay-enabled then check for delays and make state file appendation if applicable
+    // else then error out saying no matches were foound and no delays were matched
+
+    log::trace!("Checking if the jq_evaluation matches any regexes");
+    if does_string_match_any_regexes(&jq_evaluation, &config.tightener.allowed)? {
+        log::info!("String matched one of the regexes, applying patch");
+        // do the config file patching
+        Command::new("/usr/bin/yq")
+            .arg(&jq_evaluation)
+            .arg("/etc/idwt/config.yml")
+            .arg("--inplace")
+            .output()?;
+        Ok(())
+    } else if config.tightener.delay_enabled {
+        log::trace!("Iterating through config.tightener.other_delays to get matches");
+        let other_delay_match = &config
             .tightener
             .other_delays
             .iter()
@@ -69,30 +85,46 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
                 re.is_match(&jq_evaluation)
             })
             // if found a match in other_delays, use that delay
-            .map(|rule| rule.1)
-            // else use the main delay
-            .unwrap_or(&config.tightener.main_delay);
+            .map(|rule| {
+                log::debug!("Using delay from other_delays with rule: {:?}", &rule);
+                rule.1
+            });
 
-        let time_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
-        let time_to_apply = time_since_epoch.add(Duration::new(delay.to_owned().to_owned(), 0));
+        let delay = match other_delay_match {
+            Some(o) => Some(o.to_owned().to_owned()),
+            None => config.tightener.main_delay,
+        };
+        if delay.is_none() {
+            let msg = "Could not find a delay from either a other_delays regex match or main_delay";
+            log::error!("{}", msg);
+            return Err(Error::msg(msg));
+        } else {
+            let time_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
+            let time_to_apply = time_since_epoch.add(Duration::new(
+                delay.unwrap_or_default().to_owned().to_owned(),
+                0,
+            ));
 
-        let mut state = get_state()?;
-        state.delayed_edits.append(&mut vec![DelayedEdit {
-            command: jq_evaluation,
-            time_to_apply: time_to_apply.as_secs(),
-        }]);
+            log::trace!("Appending the delayed_edit rule to state file");
 
-        let json = serde_yaml::to_string(&state)?;
-        fs::write(constants::STATE_FILE, json)?;
+            let mut state = get_state()?;
+            state.delayed_edits.append(&mut vec![DelayedEdit {
+                command: jq_evaluation,
+                time_to_apply: time_to_apply.as_secs(),
+            }]);
 
+            log::trace!("Turning state into json and writing");
+
+            let json = serde_yaml::to_string(&state)?;
+            fs::write(constants::STATE_FILE, json)?;
+        }
+        // if other_delay_match use that
+        // else if main_delay != null use that
+        // else error saying no delay can be found
         return Ok(());
+    } else {
+        let msg = "No delays found and no matches were found in approved commands list, not applying any patches";
+        log::error!("{}", msg);
+        Err(Error::msg(msg))
     }
-
-    // do the config file patching
-    Command::new("/usr/bin/yq")
-        .arg(&jq_evaluation)
-        .arg("/etc/idwt/config.yml")
-        .arg("--inplace")
-        .output()?;
-    Ok(())
 }

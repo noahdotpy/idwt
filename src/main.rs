@@ -2,8 +2,6 @@ use anyhow::Result;
 use clap::Parser;
 use idwt::commands::run_command;
 use idwt::commands::Commands;
-use log::info;
-use log::warn;
 
 #[derive(Debug, Parser)]
 // #[command(about = "IDWT", long_about = None)]
@@ -18,8 +16,8 @@ struct Cli {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    env_logger::init();
-    info!("starting up");
-    warn!("oops, nothing implemented!");
+    env_logger::Builder::new()
+        .filter_level(cli.verbose.log_level_filter())
+        .init();
     run_command(cli.command)
 }
