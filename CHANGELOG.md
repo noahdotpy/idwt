@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/noahdotpy/idwt-rs/compare/v0.2.1...v0.3.0) (2024-12-11)
+
+
+### Features
+
+* implement block_flatpaks module ([051a5b2](https://github.com/noahdotpy/idwt-rs/commit/051a5b20b588fce95615183954f9820ce58c45fb))
+
 ## [0.2.1](https://github.com/noahdotpy/idwt-rs/compare/v0.2.0...v0.2.1) (2024-12-06)
 
 
