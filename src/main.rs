@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::Parser;
 use idwt::commands::run_command;
 use idwt::commands::Commands;
@@ -14,10 +13,12 @@ struct Cli {
     verbose: clap_verbosity_flag::Verbosity,
 }
 
-fn main() -> Result<()> {
+fn main() {
     let cli = Cli::parse();
     env_logger::Builder::new()
         .filter_level(cli.verbose.log_level_filter())
         .init();
-    run_command(cli.command)
+    if let Err(err) = run_command(cli.command) {
+        log::error!("Error occured: {err}")
+    }
 }

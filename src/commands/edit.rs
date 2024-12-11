@@ -10,7 +10,6 @@ use crate::{
     state::{get_state, DelayedEdit},
 };
 use anyhow::{anyhow, Error, Result};
-use log::error;
 use regex::Regex;
 
 /*
@@ -43,10 +42,9 @@ fn does_string_match_any_regexes(string: &str, regexes: &Vec<String>) -> Result<
 }
 
 pub fn edit(jq_evaluation: String) -> Result<()> {
-    let result = karen::escalate_if_needed();
-    if let Err(error) = result {
-        error!("Error escalating privileges");
-        return Err(anyhow!(error.to_string()));
+    let rs = karen::escalate_if_needed();
+    if let Err(err) = rs {
+        return Err(anyhow!(err.to_string()));
     }
 
     log::trace!("Getting config");
@@ -95,9 +93,9 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
             None => config.tightener.main_delay,
         };
         if delay.is_none() {
-            let msg = "Could not find a delay from either a other_delays regex match or main_delay";
-            log::error!("{}", msg);
-            return Err(Error::msg(msg));
+            return Err(anyhow!(
+                "Could not find a delay from either an other_delays regex match or main_delay",
+            ));
         } else {
             let time_since_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
             let time_to_apply = time_since_epoch.add(Duration::new(
@@ -123,8 +121,6 @@ pub fn edit(jq_evaluation: String) -> Result<()> {
         // else error saying no delay can be found
         return Ok(());
     } else {
-        let msg = "No delays found and no matches were found in approved commands list, not applying any patches";
-        log::error!("{}", msg);
-        Err(Error::msg(msg))
+        Err(Error::msg("No delays found and no matches were found in approved commands list, not applying any patches"))
     }
 }
