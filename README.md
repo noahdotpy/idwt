@@ -2,9 +2,8 @@
 
 ## Runtime Dependencies
 
-- A system with `iptables` enabled
-- `/usr/bin/yq` for the `tighten` command
-- `/usr/bin/sudo` for the `edit` command
+- `/usr/sbin/iptables` for the `block-networking` module
+- `/usr/bin/yq` for the `edit` command
 - `/usr/bin/gpasswd` for the `revoke-admin` module
 
 ## Usage
