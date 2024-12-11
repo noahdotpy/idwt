@@ -9,7 +9,7 @@ use crate::{
     constants,
     state::{get_state, DelayedEdit},
 };
-use anyhow::{anyhow, Error, Result};
+use anyhow::{anyhow, Error};
 use regex::Regex;
 
 /*

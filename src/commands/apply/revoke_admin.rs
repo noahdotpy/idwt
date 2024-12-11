@@ -6,7 +6,7 @@ pub fn apply_revoke_admin() -> anyhow::Result<()> {
     let config = get_config()?;
     let groups_to_remove = vec!["wheel", "sudo"];
 
-    for username in config.revoke_admin {
+    for username in config.modules.revoke_admin {
         if !config.affected_users.contains(&username) {
             log::warn!(
                 "{username} is not in affected-users, skipping execution of revoke admin command"

@@ -1,4 +1,3 @@
-use anyhow::Result;
 use figment::{
     providers::{Format, Serialized, Yaml},
     Figment,

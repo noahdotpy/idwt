@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
 use figment::{
     providers::{Format, Serialized, Yaml},
     Figment,
@@ -12,15 +11,19 @@ use crate::constants;
 #[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Config {
     pub tightener: Tightener,
+    pub modules: Modules,
 
+    #[serde(rename = "affected-users")]
+    pub affected_users: Vec<String>,
+}
+
+#[derive(Deserialize, Debug, Serialize, Default)]
+pub struct Modules {
     #[serde(rename = "block-sites")]
     pub block_sites: Vec<String>,
 
     #[serde(rename = "block-networking")]
     pub block_networking: bool,
-
-    #[serde(rename = "affected-users")]
-    pub affected_users: Vec<String>,
 
     #[serde(rename = "revoke-admin")]
     pub revoke_admin: Vec<String>,

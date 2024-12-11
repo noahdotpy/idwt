@@ -1,5 +1,3 @@
-use anyhow::Error;
-use anyhow::Result;
 use log::error;
 use std::io::Write;
 use std::path::Path;
@@ -165,9 +163,9 @@ pub fn apply_block_flatpaks() -> anyhow::Result<()> {
             .to_str()
             .unwrap_or_default()
             .to_owned();
-        if config.block_flatpaks.block.contains(&app_id)
-            || (config.block_flatpaks.block_by_default
-                && !(config.block_flatpaks.allow.contains(&app_id)))
+        if config.modules.block_flatpaks.block.contains(&app_id)
+            || (config.modules.block_flatpaks.block_by_default
+                && !(config.modules.block_flatpaks.allow.contains(&app_id)))
         {
             let store_file_path = format!("{STORE_DIR}/flatpak_overrides/{app_id}");
             let file = std::fs::OpenOptions::new()

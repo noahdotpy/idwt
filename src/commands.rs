@@ -1,4 +1,3 @@
-use anyhow::Result;
 use apply::{ApplyArgs, ApplyCommands, ApplySystemCommands};
 use clap::Subcommand;
 
