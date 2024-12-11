@@ -1,8 +1,6 @@
-use std::process::Command;
-
 use crate::config::get_config;
-use anyhow::Result;
 use log::{error, info};
+use std::process::Command;
 
 pub fn apply_block_networking() -> anyhow::Result<()> {
     let config = get_config()?;

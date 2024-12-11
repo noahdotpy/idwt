@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::Error;
 use anyhow::Result;
 use log::error;
 use std::io::Write;
@@ -17,9 +17,6 @@ use crate::constants::STORE_DIR;
 /// # Returns
 /// A `Vec<PathBuf>` containing paths to files with the `.desktop` extension.
 /// If no such files are found, the vector will be empty.
-///
-/// # Panics
-/// This function will panic if the directory cannot be accessed.
 fn find_desktop_files(dir: &str) -> Vec<PathBuf> {
     let mut desktop_files = Vec::new();
 
@@ -162,6 +159,7 @@ pub fn apply_block_flatpaks() -> anyhow::Result<()> {
     */
     for app in desktop_files.unwrap_or_default() {
         let app_id = app
+            // FIXME: I probably don't want to just have all these unwrap_or_default around
             .file_stem()
             .unwrap_or_default()
             .to_str()
@@ -248,11 +246,12 @@ pub fn apply_block_flatpaks() -> anyhow::Result<()> {
     }
     match cleanup_overrides() {
         Ok(_out) => {
-            log::info!("Cleaned up all override succesfully")
+            log::info!("Cleaned up all override succesfully");
+            Ok(())
         }
-        Err(err) => {
-            log::error!("Error occured while cleaning overrides: {err}")
-        }
-    };
+        Err(err) => Err(anyhow::anyhow!(
+            "Error occured while cleaning overrides: {err}"
+        )),
+    }?;
     Ok(())
 }
