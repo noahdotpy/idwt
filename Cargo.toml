@@ -6,13 +6,13 @@ authors = ["noahdotpy <noahdotpy@proton.me>"]
 license = "MIT OR Apache-2.0"
 description = "A self-control utility based on configuration files"
 readme = "README.md"
-homepage = "https://github.com/noahdotpy/idwt-rs"
-repository = "https://github.com/noahdotpy/idwt-rs"
+homepage = "https://github.com/noahdotpy/idwt"
+repository = "https://github.com/noahdotpy/idwt"
 keywords = ["cli"]
 categories = ["command-line-utilities"]
 
 [package.metadata.bundle]
-identifier = "io.github.noahdotpy.idwt-rs"
+identifier = "io.github.noahdotpy.idwt"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }

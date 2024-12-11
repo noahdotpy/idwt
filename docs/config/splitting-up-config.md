@@ -14,4 +14,4 @@ The configuration parser bases every step off the lower number priority file loc
 `/etc/idwt/config.d/*.yml` files are disabled.
 
 There used to be a `/usr/share/idwt/default-config.yml` but this will be defined
-in the code of idwt-rs now.
+in the code of idwt now.

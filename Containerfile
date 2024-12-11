@@ -13,4 +13,4 @@ RUN mv $CARGO_HOME/bin/idwt /out/bin/idwt
 # v{MAJOR}.{MINOR}.{PATCH} (eg: v1.2.3)
 
 # To use in  another container
-# `COPY --from=ghcr.io/noahdotpy/idwt-rs:v1.2.3 /out/bin/idwt /usr/bin/idwt
+# `COPY --from=ghcr.io/noahdotpy/idwt:v1.2.3 /out/bin/idwt /usr/bin/idwt
