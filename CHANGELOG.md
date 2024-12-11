@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/noahdotpy/idwt/compare/v0.3.0...v0.4.0) (2024-12-11)
+
+
+### Features
+
+* improve config readability by moving modules into their own modules section ([901c63c](https://github.com/noahdotpy/idwt/commit/901c63cc7f0d5d76e81226335c634c32604e1209))
+
+
+### Bug Fixes
+
+* apply system all now also runs block_flatpaks as it sohld ([6dce0f5](https://github.com/noahdotpy/idwt/commit/6dce0f5851d385b30169102c5571f0fdcff681b4))
+* block_flatpaks now properly handles errors from cleaning up ([e69db13](https://github.com/noahdotpy/idwt/commit/e69db13f4e6df27674b905dc13c9fe23fc46bed3))
+* edit command now should use proper order of checking what to do ([850e643](https://github.com/noahdotpy/idwt/commit/850e643f36d52f476968faca2cb03db8d425cb46))
+* revoke_admin now skips any users that aren't also in affected-users ([32387d7](https://github.com/noahdotpy/idwt/commit/32387d727541f57344729248abbb69d37b4cd63b))
+
 ## [0.3.0](https://github.com/noahdotpy/idwt/compare/v0.2.1...v0.3.0) (2024-12-11)
 
 
